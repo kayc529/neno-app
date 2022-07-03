@@ -104,26 +104,32 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   //remove token from db
-  await Token.findOneAndDelete({ user: req.user.userId });
+  // await Token.findOneAndDelete({ user: req.user.userId });
 
+  console.log('server logout');
   //expires accessToken cookie
-  res.cookie('accessToken', 'logout', {
+  res.cookie('accessToken', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
-    expires: new Date(Date.now()),
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  });
-  //expires refreshToken cookie
-  res.cookie('refreshToken', 'logout', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    signed: true,
-    expires: new Date(Date.now()),
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: -1,
+    path: '/',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
+    domain: process.env.NODE_ENV === 'production' ? '' : 'localhost',
   });
 
-  res.status(200).send('logout');
+  //expires refreshToken cookie
+  res.cookie('refreshToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    signed: true,
+    maxAge: -1,
+    path: '/',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
+    domain: process.env.NODE_ENV === 'production' ? '' : 'localhost',
+  });
+
+  res.status(200).json({ success: true });
 };
 
 const verifyEmail = async (req, res) => {

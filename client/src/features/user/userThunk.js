@@ -21,7 +21,7 @@ export const registerUserThunk = async (url, user, thunkAPI) => {
 
 export const logoutUserThunk = async (url, thunkAPI) => {
   try {
-    const res = await customFetch.get(url);
+    const res = await customFetch.delete(url);
     return res.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.msg);

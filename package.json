@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "client": "cd client && npm run build",
     "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "author": "Kay Cheung",

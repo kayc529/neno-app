@@ -18,24 +18,16 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
-    expires: new Date(Date.now() + oneDay),
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    // domain:
-    //   process.env.NODE_ENV === 'production'
-    //     ? 'https://test-cookies-yoo.netlify.app/'
-    //     : '',
+    maxAge: oneDay,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
   });
 
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
-    expires: new Date(Date.now() + oneMonth),
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    // domain:
-    //   process.env.NODE_ENV === 'production'
-    //     ? 'https://test-cookies-yoo.netlify.app/'
-    //     : '',
+    maxAge: oneMonth,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
   });
 };
 
