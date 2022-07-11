@@ -31,10 +31,7 @@ export const createMemoThunk = async (url, thunkAPI) => {
 };
 export const updateMemoThunk = async (url, memo, thunkAPI) => {
   try {
-    const res = await customFetch.patch(url, {
-      ...memo,
-      isPinned: !memo.isPinned,
-    });
+    const res = await customFetch.patch(url, memo);
     return res.data;
   } catch (error) {
     console.log(error);

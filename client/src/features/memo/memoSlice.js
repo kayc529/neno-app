@@ -34,16 +34,21 @@ export const getMemo = createAsyncThunk(
 export const createMemo = createAsyncThunk(
   'memo/createMemo',
   async (_, thunkAPI) => {
-    // create new memo
-    const data = await createMemoThunk('/memos', thunkAPI);
-    return data;
+    return createMemoThunk('/memos', thunkAPI);
+  }
+);
+
+export const updateMemo = createAsyncThunk(
+  'memo/updateMemo',
+  async (memo, thunkAPI) => {
+    return updateMemoThunk(`/memos/${memo._id}`, memo, thunkAPI);
   }
 );
 
 export const toggleMemoPin = createAsyncThunk(
   'memo/toggleMemoPin',
   async (memo, thunkAPI) => {
-    const data = await updateMemoThunk('/memos', memo, thunkAPI);
+    const data = await updateMemoThunk(`/memos/${memo._id}`, memo, thunkAPI);
     thunkAPI.dispatch(getAllMemos());
     return data;
   }
@@ -94,6 +99,14 @@ const memoSlice = createSlice({
     },
     [createMemo.rejected]: (state, { payload }) => {
       state.isLoading = false;
+      console.log(payload);
+    },
+    [updateMemo.pending]: (state) => {},
+    [updateMemo.fulfilled]: (state, { payload }) => {
+      const { memo } = payload;
+      state.currentMemo = memo;
+    },
+    [updateMemo.rejected]: (state, { payload }) => {
       console.log(payload);
     },
     [toggleMemoPin.pending]: () => {},
