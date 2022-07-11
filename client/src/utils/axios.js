@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { getAccessTokenFromCookies } from '../utils/cookies';
 import applyMockAdapter from './mockAdapter';
 
 const getBaseUrl = () => {
@@ -16,12 +15,9 @@ const customFetch = axios.create({
 
 applyMockAdapter(customFetch);
 
-customFetch.interceptors.request.use((config) => {
-  const token = getAccessTokenFromCookies();
-  if (token) {
-    config.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-  return config;
-});
+//interceptor
+// customFetch.interceptors.request.use((config) => {
+//   return config;
+// });
 
 export default customFetch;

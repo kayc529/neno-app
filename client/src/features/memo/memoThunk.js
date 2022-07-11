@@ -12,18 +12,29 @@ export const getAllMemosThunk = async (url, searchOptions, thunkAPI) => {
   }
 };
 
-export const getMemoThunk = async (url, memoId, thunkAPI) => {
+export const getMemoThunk = async (url, thunkAPI) => {
   try {
-    const res = await customFetch.get(url, { params: { memoId } });
+    const res = await customFetch.get(url);
     return res.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.msg);
   }
 };
 
+export const createMemoThunk = async (url, thunkAPI) => {
+  try {
+    const res = await customFetch.post(url, {});
+    return res.data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data.msg);
+  }
+};
 export const updateMemoThunk = async (url, memo, thunkAPI) => {
   try {
-    const res = await customFetch.patch(url, { ...memo });
+    const res = await customFetch.patch(url, {
+      ...memo,
+      isPinned: !memo.isPinned,
+    });
     return res.data;
   } catch (error) {
     console.log(error);

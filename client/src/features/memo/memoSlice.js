@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getAllMemosThunk, getMemoThunk, updateMemoThunk } from './memoThunk';
+import {
+  getAllMemosThunk,
+  getMemoThunk,
+  createMemoThunk,
+  updateMemoThunk,
+} from './memoThunk';
 
 const initialState = {
   memos: [],
@@ -13,7 +18,7 @@ const initialState = {
 };
 
 export const getAllMemos = createAsyncThunk(
-  'memo/getAllMemos',
+  'memos/getAllMemos',
   async (searchOptions, thunkAPI) => {
     return getAllMemosThunk('/memos', searchOptions, thunkAPI);
   }
@@ -22,7 +27,16 @@ export const getAllMemos = createAsyncThunk(
 export const getMemo = createAsyncThunk(
   'memo/getMemo',
   async (memoId, thunkAPI) => {
-    return getMemoThunk(`/memos`, memoId, thunkAPI);
+    return getMemoThunk(`/memos/${memoId}`, thunkAPI);
+  }
+);
+
+export const createMemo = createAsyncThunk(
+  'memo/createMemo',
+  async (_, thunkAPI) => {
+    // create new memo
+    const data = await createMemoThunk('/memos', thunkAPI);
+    return data;
   }
 );
 
@@ -38,7 +52,11 @@ export const toggleMemoPin = createAsyncThunk(
 const memoSlice = createSlice({
   name: 'memo',
   initialState,
-  reducers: {},
+  reducers: {
+    removeCurrentMemo(state) {
+      return { ...state, currentMemo: null };
+    },
+  },
   extraReducers: {
     [getAllMemos.pending]: (state) => {
       state.isLoading = true;
@@ -65,6 +83,19 @@ const memoSlice = createSlice({
       state.isLoading = false;
       console.log(payload);
     },
+    [createMemo.pending]: (state) => {
+      state.isLoading = true;
+      state.currentMemo = null;
+    },
+    [createMemo.fulfilled]: (state, { payload }) => {
+      const { memo } = payload;
+      state.isLoading = false;
+      state.currentMemo = memo;
+    },
+    [createMemo.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      console.log(payload);
+    },
     [toggleMemoPin.pending]: () => {},
     [toggleMemoPin.fulfilled]: () => {},
     [toggleMemoPin.rejected]: (state, { payload }) => {
@@ -73,6 +104,6 @@ const memoSlice = createSlice({
   },
 });
 
-// export const {  } = memoSlice.actions;
+export const { removeCurrentMemo } = memoSlice.actions;
 
 export default memoSlice.reducer;

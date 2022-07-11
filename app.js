@@ -22,6 +22,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 
 //routes
 const authRouter = require('./routes/authRoutes');
+const memoRouter = require('./routes/memoRoutes');
 
 //middleware
 app.set('trust proxy', 1);
@@ -57,6 +58,7 @@ app.use(cookieParser(process.env.JWT_SECRET));
 
 //routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/memos', memoRouter);
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 });

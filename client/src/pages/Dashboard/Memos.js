@@ -2,23 +2,39 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Container, Memo } from '../../components';
-import { getAllMemos } from '../../features/memo/memoSlice';
+import { createMemo, getAllMemos } from '../../features/memo/memoSlice';
+import { AiOutlinePlusCircle } from 'react-icons/ai';
+import { useNavigate } from 'react-router-dom';
 
 const Memos = () => {
-  const { memos } = useSelector((state) => state.memos);
+  const { memos, currentMemo } = useSelector((state) => state.memos);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // dispatch(getAllMemos({}));
+    dispatch(getAllMemos({}));
   }, [dispatch]);
+
+  //when new memo is created
+  useEffect(() => {
+    if (currentMemo) {
+      navigate(`../memos/${currentMemo._id}`, { replace: false, to: 'memo' });
+    }
+  }, [currentMemo, navigate]);
+
+  const addMemo = () => {
+    console.log('add memo');
+    dispatch(createMemo());
+  };
 
   return (
     <Wrapper>
       <Container>
         <div className='filters'>search bar and filter options</div>
+        <AiOutlinePlusCircle className='add-button' onClick={addMemo} />
         <div className='memos'>
           {memos.map((memo, index) => {
-            return <Memo key={memo.id} {...memo} />;
+            return <Memo key={memo._id} {...memo} />;
           })}
         </div>
       </Container>
@@ -39,6 +55,14 @@ const Wrapper = styled.main`
     grid-row-gap: 20px;
     justify-items: center;
     /* grid-column-gap: 12px; */
+  }
+
+  .add-button {
+    width: 40px;
+    height: 40px;
+    align-self: center;
+    margin: 20px 0;
+    cursor: pointer;
   }
 `;
 

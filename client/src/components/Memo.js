@@ -5,33 +5,36 @@ import { AiFillPushpin, AiOutlinePushpin } from 'react-icons/ai';
 import { useDispatch } from 'react-redux';
 import { toggleMemoPin } from '../features/memo/memoSlice';
 
-const Memo = ({ id, title, content, isPinned }) => {
+const Memo = ({ _id, title, content, isPinned }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const openMemo = () => {
-    navigate(`../memo/${id}`, { replace: false, to: 'memo' });
+    console.log('open memo with id: ', _id);
+    navigate(`../memos/${_id}`, { replace: false, to: 'memo' });
   };
 
   const togglePin = () => {
     //patch request to update pin state
-    dispatch(toggleMemoPin({ id, isPinned: !isPinned }));
+    dispatch(toggleMemoPin({ _id, isPinned: !isPinned }));
   };
 
   return (
     <Wrapper>
+      <div className='clickable' onClick={openMemo}></div>
       {isPinned ? (
         <AiFillPushpin className='pin' onClick={togglePin} />
       ) : (
         <AiOutlinePushpin className='pin' onClick={togglePin} />
       )}
-      <h1 onClick={openMemo}>{title}</h1>
+      <h1>{title}</h1>
       <p>{content}</p>
     </Wrapper>
   );
 };
 
 const Wrapper = styled.article`
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 300px;
@@ -43,6 +46,7 @@ const Wrapper = styled.article`
   opacity: 0.75;
   transition-duration: 0.3s;
   border-radius: 0.35rem;
+  overflow: hidden;
 
   .pin {
     width: 30px;
@@ -52,6 +56,14 @@ const Wrapper = styled.article`
 
   &:hover {
     opacity: 1;
+  }
+
+  .clickable {
+    position: absolute;
+    width: 300px;
+    min-width: 240px;
+    height: 300px;
+    z-index: 0;
   }
 `;
 

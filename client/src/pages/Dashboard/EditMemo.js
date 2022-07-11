@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Container } from '../../components';
 import { useDispatch, useSelector } from 'react-redux';
-import { getMemo } from '../../features/memo/memoSlice';
-import { Link } from 'react-router-dom';
+import { getMemo, removeCurrentMemo } from '../../features/memo/memoSlice';
+import { AiOutlineArrowLeft } from 'react-icons/ai';
+import { useNavigate } from 'react-router-dom';
 
 const EditMemo = () => {
   const [memoId, setMemoId] = useState('');
   const [data, setData] = useState({});
   const { isLoading, currentMemo } = useSelector((state) => state.memos);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const getMemoIdFromUrl = () => {
     const url = document.URL;
@@ -57,6 +59,11 @@ const EditMemo = () => {
     }
   };
 
+  const goBackToHome = () => {
+    dispatch(removeCurrentMemo());
+    navigate('../', { replace: false, to: '/' });
+  };
+
   if (isLoading) {
     return (
       <Wrapper>
@@ -70,7 +77,7 @@ const EditMemo = () => {
       <Wrapper>
         <Container>
           <h1>Not Found</h1>
-          <Link to='/'>Go Back</Link>
+          <AiOutlineArrowLeft className='back-btn' onClick={goBackToHome} />
         </Container>
       </Wrapper>
     );
@@ -79,9 +86,7 @@ const EditMemo = () => {
   return (
     <Wrapper>
       <Container>
-        <Link to='/' className='primary-btn btn'>
-          Back
-        </Link>
+        <AiOutlineArrowLeft className='back-btn' onClick={goBackToHome} />
         <input
           name='title'
           type='text'
@@ -121,6 +126,12 @@ const Wrapper = styled.main`
   }
   .tags {
     display: flex;
+  }
+
+  .back-btn {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
   }
 `;
 

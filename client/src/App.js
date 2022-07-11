@@ -19,7 +19,7 @@ function App() {
           }
         >
           <Route index element={<Memos />} />
-          <Route path='memo/:id' element={<EditMemo />} />
+          <Route path='memos/:id' element={<EditMemo />} />
           <Route path='todos' element={<Todos />} />
         </Route>
         <Route path='login' element={<Login />} />

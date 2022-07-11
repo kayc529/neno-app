@@ -19,7 +19,6 @@ const register = async (req, res) => {
   const verificationToken = crypto.randomBytes(40).toString('hex');
 
   //create user in db
-
   const user = await User.create({
     username,
     email,
@@ -27,13 +26,24 @@ const register = async (req, res) => {
     verificationToken,
   });
 
+  //TODO
   //send verification email
 
-  //send res
+  //TO BE REMOVED
+  //ignore verification
+  //create token user and refreshtoken
+  //attach cookies
+  const tokenUser = createTokenUser(user);
+
+  refreshToken = crypto.randomBytes(40).toString('hex');
+  const userAgent = req.headers['user-agent'];
+  const ip = req.ip;
+  const userToken = { refreshToken, ip, userAgent, user: user._id };
+  await Token.create(userToken);
+
   res.status(StatusCodes.CREATED).json({
-    username: user.username,
-    email: user.email,
-    role: user.role,
+    success: true,
+    user: tokenUser,
   });
 };
 
@@ -86,11 +96,11 @@ const login = async (req, res) => {
     refreshToken = existingToken.refreshToken;
     attachCookiesToResponse({ res, user: tokenUser, refreshToken });
 
-    res.status(StatusCodes.OK).json({ user: tokenUser });
+    res.status(StatusCodes.OK).json({ success: true, user: tokenUser });
     return;
   }
 
-  //if token does not exist, create new refresh token and write to db
+  //if token does not exist(user logged out before), create new refresh token and write to db
   //attach cookie to response
   refreshToken = crypto.randomBytes(40).toString('hex');
   const userAgent = req.headers['user-agent'];
@@ -99,21 +109,20 @@ const login = async (req, res) => {
   await Token.create(userToken);
 
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
-  res.status(StatusCodes.OK).json({ user: tokenUser });
+  res.status(StatusCodes.OK).json({ success: true, user: tokenUser });
 };
 
 const logout = async (req, res) => {
   //remove token from db
-  // await Token.findOneAndDelete({ user: req.user.userId });
+  await Token.findOneAndDelete({ user: req.user.userId });
 
-  console.log('server logout');
   //expires accessToken cookie
   res.cookie('accessToken', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     signed: true,
     maxAge: -1,
-    path: '/',
+    // path: '/',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
     domain: process.env.NODE_ENV === 'production' ? '' : 'localhost',
   });
@@ -124,7 +133,7 @@ const logout = async (req, res) => {
     secure: process.env.NODE_ENV === 'production',
     signed: true,
     maxAge: -1,
-    path: '/',
+    // path: '/',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : '',
     domain: process.env.NODE_ENV === 'production' ? '' : 'localhost',
   });

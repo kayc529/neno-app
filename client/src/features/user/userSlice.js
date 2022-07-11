@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
-  createDummyUserCookie,
-  getUserFromCookies,
-  removeDummyUserCookie,
-} from '../../utils/cookies';
+  getUserFromLocalStorage,
+  storeUserInLocalStorage,
+  removeUserFromLocalStorage,
+} from '../../utils/localStorage';
 import {
   loginUserThunk,
   registerUserThunk,
@@ -12,7 +12,7 @@ import {
 
 const initialState = {
   isLoading: false,
-  user: getUserFromCookies(),
+  user: getUserFromLocalStorage(),
   isSidebarOpen: false,
 };
 
@@ -51,11 +51,9 @@ const userSlice = createSlice({
     },
     [loginUser.fulfilled]: (state, { payload }) => {
       const { user } = payload;
+      storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
-      console.log('yeah!!');
-      //dev only
-      // createDummyUserCookie();
     },
     [loginUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
@@ -66,10 +64,9 @@ const userSlice = createSlice({
     },
     [registerUser.fulfilled]: (state, { payload }) => {
       const { user } = payload;
+      storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
-      //dev only
-      // createDummyUserCookie();
     },
     [registerUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
@@ -79,10 +76,9 @@ const userSlice = createSlice({
       state.isLoading = true;
     },
     [logoutUser.fulfilled]: (state) => {
+      removeUserFromLocalStorage();
       state.user = null;
       state.isLoading = false;
-      //dev only
-      removeDummyUserCookie();
     },
     [logoutUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
