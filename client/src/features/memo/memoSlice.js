@@ -5,11 +5,13 @@ import {
   createMemoThunk,
   updateMemoThunk,
 } from './memoThunk';
+import { toastMessage, MessageTypes } from '../../utils/toast';
 
 const initialState = {
   memos: [],
   currentMemo: null,
   isLoading: false,
+  isSaving: false,
   searchOptions: {
     page: 1,
     keywords: '',
@@ -87,6 +89,7 @@ const memoSlice = createSlice({
     [getMemo.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+      toastMessage('Failed to get memo', MessageTypes.ERROR);
     },
     [createMemo.pending]: (state) => {
       state.isLoading = true;
@@ -100,14 +103,21 @@ const memoSlice = createSlice({
     [createMemo.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+      toastMessage('Failed to create memo', MessageTypes.ERROR);
     },
-    [updateMemo.pending]: (state) => {},
+    [updateMemo.pending]: (state) => {
+      state.isSaving = true;
+    },
     [updateMemo.fulfilled]: (state, { payload }) => {
       const { memo } = payload;
+      state.isSaving = false;
       state.currentMemo = memo;
+      toastMessage('Memo saved!', MessageTypes.SUCCESS);
     },
     [updateMemo.rejected]: (state, { payload }) => {
+      state.isSaving = false;
       console.log(payload);
+      toastMessage('Failed to update memo', MessageTypes.ERROR);
     },
     [toggleMemoPin.pending]: () => {},
     [toggleMemoPin.fulfilled]: () => {},

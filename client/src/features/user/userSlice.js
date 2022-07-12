@@ -9,6 +9,7 @@ import {
   registerUserThunk,
   logoutUserThunk,
 } from './userThunk';
+import { toastMessage, MessageTypes } from '../../utils/toast';
 
 const initialState = {
   isLoading: false,
@@ -58,10 +59,12 @@ const userSlice = createSlice({
       storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
+      toastMessage(`Welcome, ${user.username}!`);
     },
     [loginUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+      toastMessage('Login failed', MessageTypes.ERROR);
     },
     [registerUser.pending]: (state) => {
       state.isLoading = true;
@@ -71,10 +74,12 @@ const userSlice = createSlice({
       storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
+      toastMessage(`Welcome, ${user.username}!`);
     },
     [registerUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+      toastMessage('Registration failed', MessageTypes.ERROR);
     },
     [logoutUser.pending]: (state) => {
       state.isLoading = true;
@@ -83,6 +88,7 @@ const userSlice = createSlice({
       removeUserFromLocalStorage();
       state.user = null;
       state.isLoading = false;
+      toastMessage('Logged out', MessageTypes.SUCCESS);
     },
     [logoutUser.rejected]: (state, { payload }) => {
       state.isLoading = false;

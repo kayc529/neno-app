@@ -2,7 +2,6 @@ import customFetch from './axios';
 import { removeUser } from '../features/user/userSlice';
 
 export const interceptor = (store) => {
-  console.log(store);
   customFetch.interceptors.response.use(
     (response) => {
       return response;
@@ -13,7 +12,7 @@ export const interceptor = (store) => {
         error.response.status === 401 &&
         error.response.data.msg === 'INVALID_TOKEN'
       ) {
-        //dispatch store action to remove user
+        //dispatch action to remove user
         store.dispatch(removeUser());
       }
       return Promise.reject(error);
