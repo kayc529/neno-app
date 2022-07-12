@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { Container, MemoTag } from '../../components';
+import { Container, Loader, MemoTag } from '../../components';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getMemo,
@@ -13,7 +13,9 @@ import {
   AiOutlinePushpin,
   AiFillPushpin,
   AiOutlinePlusCircle,
+  AiOutlineDelete,
 } from 'react-icons/ai';
+import { BiArchiveIn } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 
 const EditMemo = () => {
@@ -22,7 +24,9 @@ const EditMemo = () => {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [showAddTag, setShowAddTag] = useState(false);
-  const { isLoading, currentMemo } = useSelector((state) => state.memos);
+  const { isLoading, currentMemo, isSaving } = useSelector(
+    (state) => state.memos
+  );
   const tagInputRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -141,17 +145,23 @@ const EditMemo = () => {
   if (isLoading) {
     return (
       <Wrapper>
-        <Container>isloading</Container>
+        <Container>
+          <Loader />
+        </Container>
       </Wrapper>
     );
   }
 
+  //TODO
+  //make it prettier
   if (!isLoading && !currentMemo) {
     return (
       <Wrapper>
         <Container>
+          <div className='row top-bar'>
+            <AiOutlineArrowLeft className='icon-btn' onClick={goBackHome} />
+          </div>
           <h1>Not Found</h1>
-          <AiOutlineArrowLeft className='icon-btn' onClick={goBackHome} />
         </Container>
       </Wrapper>
     );
@@ -162,15 +172,27 @@ const EditMemo = () => {
       <Container>
         <div className='row top-bar'>
           <AiOutlineArrowLeft className='icon-btn' onClick={goBackHome} />
-          <AiOutlineSave className='icon-btn' onClick={saveMemo} />
+          <div className='save-button-container'>
+            {isSaving ? (
+              <p>Saving...</p>
+            ) : (
+              <AiOutlineSave
+                className='icon-btn icon-spacing'
+                onClick={saveMemo}
+              />
+            )}
+            <BiArchiveIn className='icon-btn icon-spacing' />
+            <AiOutlineDelete className='icon-btn' />
+          </div>
         </div>
-        <div className='row'>
+        <div className='row title'>
           {data?.isPinned ? (
             <AiFillPushpin className='icon-btn' onClick={togglePin} />
           ) : (
             <AiOutlinePushpin className='icon-btn' onClick={togglePin} />
           )}
           <input
+            className='title-input'
             name='title'
             type='text'
             value={data.title}
@@ -208,7 +230,6 @@ const EditMemo = () => {
 
 const Wrapper = styled.main`
   input {
-    max-width: 500px;
     width: 80%;
     font-size: 30px;
     border: 0;
@@ -218,6 +239,7 @@ const Wrapper = styled.main`
     width: 80%;
     resize: none;
     border: none;
+    margin-top: 24px;
     /* background-color: red; */
   }
 
@@ -248,8 +270,22 @@ const Wrapper = styled.main`
     align-items: center;
   }
 
+  .title {
+    margin-top: 24px;
+  }
+
   .top-bar {
     justify-content: space-between;
+  }
+
+  .save-button-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .save-button-container p {
+    opacity: 0.5;
+    margin-right: 12px;
   }
 
   .tags {
@@ -270,6 +306,10 @@ const Wrapper = styled.main`
 
   .close-tag-input {
     transform: rotate(45deg);
+  }
+
+  .icon-spacing {
+    margin-right: 8px;
   }
 `;
 

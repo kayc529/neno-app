@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Container, Memo } from '../../components';
+import { Container, Memo, Loader } from '../../components';
 import { createMemo, getAllMemos } from '../../features/memo/memoSlice';
 import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
 const Memos = () => {
-  const { memos, currentMemo } = useSelector((state) => state.memos);
+  const { memos, currentMemo, isLoading } = useSelector((state) => state.memos);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -32,11 +32,15 @@ const Memos = () => {
       <Container>
         <div className='filters'>search bar and filter options</div>
         <AiOutlinePlusCircle className='add-button' onClick={addMemo} />
-        <div className='memos'>
-          {memos.map((memo, index) => {
-            return <Memo key={memo._id} {...memo} />;
-          })}
-        </div>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <div className='memos'>
+            {memos.map((memo, index) => {
+              return <Memo key={memo._id} {...memo} />;
+            })}
+          </div>
+        )}
       </Container>
     </Wrapper>
   );

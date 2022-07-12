@@ -3,29 +3,33 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Error from './pages/Error';
 import ProtectedRoute from './pages/ProtectedRoute';
+import { DialogModal } from './components';
 import { SharedLayout, Memos, EditMemo, Todos } from './pages/Dashboard';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/home' element={<Landing />} />
-        <Route
-          path='/'
-          element={
-            <ProtectedRoute>
-              <SharedLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Memos />} />
-          <Route path='memos/:id' element={<EditMemo />} />
-          <Route path='todos' element={<Todos />} />
-        </Route>
-        <Route path='login' element={<Login />} />
-        <Route path='*' element={<Error />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      {/* <DialogModal /> */}
+      <BrowserRouter>
+        <Routes>
+          <Route path='/home' element={<Landing />} />
+          <Route
+            path='/'
+            element={
+              <ProtectedRoute>
+                <SharedLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Memos />} />
+            <Route path='memos/:id' element={<EditMemo />} />
+            <Route path='todos' element={<Todos />} />
+          </Route>
+          <Route path='login' element={<Login />} />
+          <Route path='*' element={<Error />} />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 
