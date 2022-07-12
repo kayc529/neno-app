@@ -15,9 +15,4 @@ const customFetch = axios.create({
 
 applyMockAdapter(customFetch);
 
-//interceptor
-// customFetch.interceptors.request.use((config) => {
-//   return config;
-// });
-
 export default customFetch;

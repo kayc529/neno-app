@@ -1,6 +1,7 @@
 const CustomError = require('../errors');
 const { isTokenValid, attachCookiesToResponse } = require('../utils');
 const Token = require('../models/Token');
+const errorMessages = require('../errors/error-messages');
 
 const authenticateUser = async (req, res, next) => {
   const { accessToken, refreshToken } = req.signedCookies;
@@ -25,7 +26,7 @@ const authenticateUser = async (req, res, next) => {
     //if no existing token for that user in the DB
     //or the refreshToken is set to invalid
     if (!existingToken || !existingToken.isValid) {
-      throw new CustomerError.UnauthenticatedError('Authentication Invalid');
+      throw new CustomerError.UnauthenticatedError(errorMessages.INVALID_TOKEN);
     }
 
     //resend cookies to the client
@@ -41,7 +42,7 @@ const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    throw new CustomError.UnauthenticatedError('Authentication Invalid');
+    throw new CustomError.UnauthenticatedError(errorMessages.INVALID_TOKEN);
   }
 };
 
