@@ -7,6 +7,7 @@ import Memo from './Memo';
 import MemoTag from './MemoTag';
 import Loader from './Loader';
 import DialogModal from './DialogModal';
+import Select from './Select';
 
 export {
   FormRow,
@@ -18,4 +19,5 @@ export {
   MemoTag,
   Loader,
   DialogModal,
+  Select,
 };

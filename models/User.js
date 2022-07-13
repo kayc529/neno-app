@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { securityQuestions } = require('../utils');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -34,12 +35,22 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verified: Date,
+    verifiedOn: Date,
     passwordToken: {
       type: String,
     },
     passwordTokenExpirationDate: {
       type: Date,
+    },
+    birthday: {
+      type: Date,
+    },
+    securityQuestion: {
+      type: String,
+      enum: securityQuestions,
+    },
+    securityAnswer: {
+      type: String,
     },
   },
   { timestamps: true }

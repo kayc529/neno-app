@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Logo, FormRow } from '../components';
+import { Logo, FormRow, Select } from '../components';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../features/user/userSlice';
+import { securityQuestions } from '../utils/options';
 
 const initUserInput = {
   name: '',
   email: '',
   password: '',
+  securityQuestion: '',
+  securityAnswer: '',
 };
 
 const Login = () => {
@@ -26,9 +29,14 @@ const Login = () => {
 
   const submitForm = (e) => {
     e.preventDefault();
-    const { name, email, password } = userInput;
+    const { name, email, password, securityQuestion, securityAnswer } =
+      userInput;
 
-    if (!email || !password || (!isLogin && !name)) {
+    if (
+      !email ||
+      !password ||
+      (!isLogin && (!name || !securityQuestion || !securityAnswer))
+    ) {
       console.log('Please fill in all the info');
       return;
     }
@@ -40,7 +48,14 @@ const Login = () => {
       return;
     }
 
-    const user = { username: name, email, password };
+    const user = {
+      username: name,
+      email,
+      password,
+      securityQuestion,
+      securityAnswer,
+    };
+
     dispatch(registerUser(user));
   };
 
@@ -48,6 +63,11 @@ const Login = () => {
     const name = e.target.name;
     const value = e.target.value;
     let temp = { ...userInput, [name]: value };
+    setUserInput(temp);
+  };
+
+  const onOptionSelected = (e) => {
+    let temp = { ...userInput, securityQuestion: e.target.value };
     setUserInput(temp);
   };
 
@@ -67,7 +87,6 @@ const Login = () => {
             onChange={onValueChange}
           />
         )}
-
         <FormRow
           type='email'
           name='email'
@@ -80,6 +99,23 @@ const Login = () => {
           value={userInput.password}
           onChange={onValueChange}
         />
+        {isLogin || (
+          <>
+            <Select
+              options={securityQuestions}
+              onChange={onOptionSelected}
+              value={userInput.securityQuestion}
+              placeholder='Please choose a security question'
+            />
+            <FormRow
+              type='text'
+              name='securityAnswer'
+              value={userInput.securityAnswer}
+              onChange={onValueChange}
+              showLabel={false}
+            />
+          </>
+        )}
         <button className='primary-btn btn' onClick={submitForm}>
           {isLogin ? 'login' : 'register'}
         </button>
