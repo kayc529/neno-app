@@ -39,7 +39,13 @@ const register = async (req, res) => {
   const userAgent = req.headers['user-agent'];
   const ip = req.ip;
   const userToken = { refreshToken, ip, userAgent, user: user._id };
-  await Token.create(userToken);
+  const token = await Token.create(userToken);
+
+  attachCookiesToResponse({
+    res,
+    user: tokenUser,
+    refreshToken: token.refreshToken,
+  });
 
   res.status(StatusCodes.CREATED).json({
     success: true,
