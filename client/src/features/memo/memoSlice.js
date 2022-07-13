@@ -4,6 +4,7 @@ import {
   getMemoThunk,
   createMemoThunk,
   updateMemoThunk,
+  deleteMemoThunk,
 } from './memoThunk';
 import { toastMessage, MessageTypes } from '../../utils/toast';
 
@@ -12,6 +13,8 @@ const initialState = {
   currentMemo: null,
   isLoading: false,
   isSaving: false,
+  canSave: false,
+  isDeleted: false,
   searchOptions: {
     page: 1,
     keywords: '',
@@ -56,12 +59,24 @@ export const toggleMemoPin = createAsyncThunk(
   }
 );
 
+export const deleteMemo = createAsyncThunk(
+  'memo/deleteMemo',
+  async (memo, thunkAPI) => {
+    const data = await deleteMemoThunk(`/memos/${memo._id}`, thunkAPI);
+    thunkAPI.dispatch(getAllMemos());
+    return data;
+  }
+);
+
 const memoSlice = createSlice({
   name: 'memo',
   initialState,
   reducers: {
-    removeCurrentMemo(state) {
-      return { ...state, currentMemo: null };
+    resetEditMemoStates(state) {
+      return { ...state, currentMemo: null, isDeleted: false };
+    },
+    enableSave(state) {
+      return { ...state, canSave: true };
     },
   },
   extraReducers: {
@@ -76,6 +91,7 @@ const memoSlice = createSlice({
     [getAllMemos.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+      toastMessage('Failed to get memos', MessageTypes.ERROR);
     },
     [getMemo.pending]: (state) => {
       state.isLoading = true;
@@ -112,12 +128,22 @@ const memoSlice = createSlice({
       const { memo } = payload;
       state.isSaving = false;
       state.currentMemo = memo;
+      state.canSave = false;
       toastMessage('Memo saved!', MessageTypes.SUCCESS);
     },
     [updateMemo.rejected]: (state, { payload }) => {
       state.isSaving = false;
       console.log(payload);
       toastMessage('Failed to update memo', MessageTypes.ERROR);
+    },
+    [deleteMemo.pending]: (state) => {},
+    [deleteMemo.fulfilled]: (state) => {
+      state.isDeleted = true;
+      toastMessage('Memo deleted!', MessageTypes.SUCCESS);
+    },
+    [deleteMemo.rejected]: (state, { payload }) => {
+      console.log(payload);
+      toastMessage('Failed to delete memo', MessageTypes.ERROR);
     },
     [toggleMemoPin.pending]: () => {},
     [toggleMemoPin.fulfilled]: () => {},
@@ -127,6 +153,6 @@ const memoSlice = createSlice({
   },
 });
 
-export const { removeCurrentMemo } = memoSlice.actions;
+export const { resetEditMemoStates, enableSave } = memoSlice.actions;
 
 export default memoSlice.reducer;

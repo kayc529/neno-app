@@ -38,3 +38,12 @@ export const updateMemoThunk = async (url, memo, thunkAPI) => {
     return thunkAPI.rejectWithValue(error.response.data.msg);
   }
 };
+
+export const deleteMemoThunk = async (url, thunkAPI) => {
+  try {
+    const res = await customFetch.delete(url);
+    return res.data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response.data.msg);
+  }
+};

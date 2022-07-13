@@ -4,8 +4,10 @@ import { Container, Loader, MemoTag } from '../../components';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getMemo,
-  removeCurrentMemo,
+  resetEditMemoStates,
   updateMemo,
+  deleteMemo,
+  enableSave,
 } from '../../features/memo/memoSlice';
 import {
   AiOutlineArrowLeft,
@@ -24,7 +26,7 @@ const EditMemo = () => {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [showAddTag, setShowAddTag] = useState(false);
-  const { isLoading, currentMemo, isSaving } = useSelector(
+  const { isLoading, currentMemo, isSaving, isDeleted, canSave } = useSelector(
     (state) => state.memos
   );
   const tagInputRef = useRef(null);
@@ -63,45 +65,39 @@ const EditMemo = () => {
     }
   }, [showAddTag]);
 
+  //go back to home page once the memo is deleted
+  useEffect(() => {
+    if (isDeleted) {
+      goBackHome();
+    }
+  }, [isDeleted]);
+
   const setTagsArr = () => {
     const temp = currentMemo.tags?.split('+') || [];
     console.log(temp);
     setTags(temp);
   };
 
-  const handleDataChange = (e) => {
+  const onDataChanged = (e) => {
     //TODO
     //auto save after 10secs
     const name = e.target.name;
     const value = e.target.value;
     let temp = { ...data, [name]: value };
     setData(temp);
+    dispatch(enableSave());
   };
 
   const togglePin = () => {
     let temp = { ...data, isPinned: !data.isPinned };
     setData(temp);
+    dispatch(enableSave());
   };
 
   const removeTag = (tagName) => {
     let temp = tags.filter((tag) => tag !== tagName);
     setTags(temp);
-  };
-
-  const generateTags = () => {
-    return (
-      <>
-        {tags.map((tag, index) => {
-          return (
-            <MemoTag
-              key={`${tag}${index}`}
-              tagName={tag}
-              removeTag={removeTag}
-            />
-          );
-        })}
-      </>
-    );
+    dispatch(enableSave());
   };
 
   const toggleAddNewTagButton = () => {
@@ -109,37 +105,47 @@ const EditMemo = () => {
     setNewTag('');
   };
 
-  const handleTagInputChange = (e) => {
+  const onTagInputChanged = (e) => {
     setNewTag(e.target.value);
   };
 
   //check if the user pressed the enter key
-  const handleTagInputKeyDown = (e) => {
+  const onTagInputKeyDown = (e) => {
     if (e.key === 'Enter') {
       const tagName = newTag.trim();
       //will not add tag if already exists
       if (tags.includes(tagName)) {
         return;
       }
+
       //add new tag to tag list
       let temp = [...tags];
       temp.push(tagName);
       setTags(temp);
       setNewTag('');
       setShowAddTag(false);
+
+      //enable user to save memo
+      dispatch(enableSave());
     }
   };
 
   const goBackHome = () => {
-    dispatch(removeCurrentMemo());
+    dispatch(resetEditMemoStates());
     navigate('../', { replace: false, to: '/' });
   };
 
-  const saveMemo = () => {
+  const onSaveMemo = () => {
+    //if no changes have been made, don't allow user to save
+    if (!canSave) return;
+
     const tagsString = tags.join('+');
     let updatedMemo = { ...data, tags: tagsString };
-
     dispatch(updateMemo(updatedMemo));
+  };
+
+  const onDeleteMemo = () => {
+    dispatch(deleteMemo(data));
   };
 
   if (isLoading) {
@@ -171,45 +177,66 @@ const EditMemo = () => {
     <Wrapper>
       <Container>
         <div className='row top-bar'>
+          {/* BACK BUTTON */}
           <AiOutlineArrowLeft className='icon-btn' onClick={goBackHome} />
           <div className='save-button-container'>
+            {/* SAVE MEMO BUTTON */}
             {isSaving ? (
               <p>Saving...</p>
             ) : (
               <AiOutlineSave
-                className='icon-btn icon-spacing'
-                onClick={saveMemo}
+                className={
+                  canSave
+                    ? 'icon-btn icon-spacing'
+                    : 'icon-btn icon-spacing disabled'
+                }
+                onClick={onSaveMemo}
               />
             )}
+            {/* ARCHIVE MEMO BUTTON */}
             <BiArchiveIn className='icon-btn icon-spacing' />
-            <AiOutlineDelete className='icon-btn' />
+            {/* DELETE MEMO BUTTON */}
+            <AiOutlineDelete className='icon-btn' onClick={onDeleteMemo} />
           </div>
         </div>
         <div className='row title'>
+          {/* PIN BUTTON */}
           {data?.isPinned ? (
             <AiFillPushpin className='icon-btn' onClick={togglePin} />
           ) : (
             <AiOutlinePushpin className='icon-btn' onClick={togglePin} />
           )}
+          {/* TITLE INPUT */}
           <input
             className='title-input'
             name='title'
             type='text'
             value={data.title}
-            onChange={handleDataChange}
+            onChange={onDataChanged}
           />
         </div>
         <div className='tags row'>
-          {generateTags()}
+          {/* TAGS */}
+          {tags.map((tag, index) => {
+            return (
+              <MemoTag
+                key={`${tag}${index}`}
+                tagName={tag}
+                removeTag={removeTag}
+              />
+            );
+          })}
+          {/* NEW TAG INPUT */}
           <input
             className={showAddTag ? 'add-tag-input show' : 'add-tag-input'}
             ref={tagInputRef}
             type='text'
             placeholder='#add tag'
             value={newTag}
-            onChange={handleTagInputChange}
-            onKeyDown={handleTagInputKeyDown}
+            onChange={onTagInputChanged}
+            onKeyDown={onTagInputKeyDown}
           />
+          {/* ADD NEW TAG BUTTON */}
           <AiOutlinePlusCircle
             className={
               showAddTag ? 'small-icon-btn close-tag-input' : 'small-icon-btn'
@@ -217,11 +244,12 @@ const EditMemo = () => {
             onClick={toggleAddNewTagButton}
           />
         </div>
+        {/* CONTENT TEXTAREA */}
         <textarea
           placeholder='Start writing...'
           value={data.content}
           name='content'
-          onChange={handleDataChange}
+          onChange={onDataChanged}
         ></textarea>
       </Container>
     </Wrapper>
@@ -240,7 +268,6 @@ const Wrapper = styled.main`
     resize: none;
     border: none;
     margin-top: 24px;
-    /* background-color: red; */
   }
 
   input:focus,
@@ -310,6 +337,11 @@ const Wrapper = styled.main`
 
   .icon-spacing {
     margin-right: 8px;
+  }
+
+  .disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 `;
 
