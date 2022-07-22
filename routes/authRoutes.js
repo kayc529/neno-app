@@ -5,7 +5,9 @@ const {
   login,
   logout,
   verifyEmail,
-  forgotPassword,
+  verifyForgetPasswordInfo,
+  verifySecurityAnswer,
+  verifyPasswordToken,
   resetPassword,
 } = require('../controllers/authControllers');
 const { authenticateUser } = require('../middleware/authentication');
@@ -13,8 +15,12 @@ const { authenticateUser } = require('../middleware/authentication');
 router.post('/register', register);
 router.post('/login', login);
 router.delete('/logout', authenticateUser, logout);
-router.post('/verify-email', verifyEmail);
-router.post('/reset-password', resetPassword);
-router.post('/forgot-password', forgotPassword);
+// router.post('/verify-email', verifyEmail);
+router.post('/get-security', verifyForgetPasswordInfo);
+router.post('/forgot-password', verifySecurityAnswer);
+router
+  .route('/reset-password/:passwordToken')
+  .get(verifyPasswordToken)
+  .post(resetPassword);
 
 module.exports = router;

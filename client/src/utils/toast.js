@@ -18,7 +18,6 @@ export const toastMessage = (msg, messageType = MessageTypes.DEFAULT) => {
     }
     case MessageTypes.DEFAULT:
     default: {
-      console.log('waaaat');
       toast(msg);
       break;
     }

@@ -24,6 +24,7 @@
     "helmet": "^5.1.0",
     "http-status-codes": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
     "mongoose": "^6.3.8",
     "validator": "^13.7.0",
     "xss-clean": "^0.1.1"

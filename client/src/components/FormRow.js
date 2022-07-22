@@ -1,10 +1,23 @@
-const FormRow = ({ type, name, value, onChange, showLabel = true }) => {
+import styled from 'styled-components';
+
+const FormRow = ({
+  type,
+  name,
+  value,
+  onChange,
+  showLabel = true,
+  showLabelOnly = false,
+}) => {
   return (
-    <div>
-      {showLabel && <label htmlFor={name}>{name}</label>}
-      <input type={type} name={name} onChange={onChange} value={value} />
-    </div>
+    <Wrapper>
+      {showLabel && <label>{name}</label>}
+      {showLabelOnly || (
+        <input type={type} name={name} onChange={onChange} value={value} />
+      )}
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.div``;
 
 export default FormRow;

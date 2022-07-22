@@ -2,7 +2,6 @@ export const getUserFromLocalStorage = () => {
   try {
     //if refreshToken hasn't expired, return user
     const user = JSON.parse(localStorage.getItem('user'));
-    console.log('user in local storage: ', user);
     return user;
   } catch (error) {
     console.log('cannot get user from local storage: ', error);

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { securityQuestions } = require('../utils');
+const moment = require('moment');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -59,13 +60,41 @@ const UserSchema = new mongoose.Schema(
 UserSchema.pre('save', async function () {
   //hash password before saving in db
   //prevent overwriting the password when saving other changes
-  if (!this.isModified('password')) return;
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (!this.isModified('password') && !this.isModified('securityAnswer')) {
+    console.log('no hashing needed');
+    return;
+  }
+
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+
+  if (this.isModified('securityAnswer')) {
+    const salt = await bcrypt.genSalt(10);
+    this.securityAnswer = await bcrypt.hash(
+      this.securityAnswer.toLowerCase(),
+      salt
+    );
+  }
 });
 
 UserSchema.methods.comparePassword = async function (enteredPassword) {
   const isMatch = await bcrypt.compare(enteredPassword, this.password);
+  return isMatch;
+};
+
+UserSchema.methods.compareBirthdays = function (enteredBirthday) {
+  const moment1 = moment(this.birthday);
+  const moment2 = moment(enteredBirthday);
+  return moment1.isSame(moment2);
+};
+
+UserSchema.methods.compareSecurityAnswers = async function (enteredAnswer) {
+  const isMatch = await bcrypt.compare(
+    enteredAnswer.toLowerCase(),
+    this.securityAnswer
+  );
   return isMatch;
 };
 

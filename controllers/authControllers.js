@@ -5,10 +5,22 @@ const CustomError = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
 const crypto = require('crypto');
-const { createTokenUser, attachCookiesToResponse } = require('../utils');
+const {
+  createTokenUser,
+  attachCookiesToResponse,
+  createJWT,
+  isTokenValid,
+} = require('../utils');
 
 const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const {
+    username,
+    email,
+    password,
+    birthday,
+    securityQuestion,
+    securityAnswer,
+  } = req.body;
   //check if email is already registered
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -24,6 +36,9 @@ const register = async (req, res) => {
     email,
     password,
     verificationToken,
+    birthday,
+    securityQuestion,
+    securityAnswer,
   });
 
   //TODO
@@ -151,12 +166,82 @@ const verifyEmail = async (req, res) => {
   res.status(200).send('verifyEmail');
 };
 
-const forgotPassword = async (req, res) => {
-  res.status(200).send('forgotPassword');
+const verifyForgetPasswordInfo = async (req, res) => {
+  const { email, birthday } = req.body;
+  //check if user exists
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    throw new CustomError.BadRequestError('Information does not match');
+  }
+
+  //check if birthday matches db
+  const isBirthdayMatch = user.compareBirthdays(birthday);
+  if (!isBirthdayMatch) {
+    throw new CustomError.BadRequestError('Information does not match');
+  }
+
+  //return security question
+  res.status(StatusCodes.OK).json({ securityQuestion: user.securityQuestion });
+};
+
+const verifySecurityAnswer = async (req, res) => {
+  const { email, securityAnswer } = req.body;
+  //get user with that email
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    throw new CustomError.BadRequestError('Information does not match');
+  }
+  //check if security answer match
+  const isAnswerMatch = await user.compareSecurityAnswers(securityAnswer);
+  if (!isAnswerMatch) {
+    throw new CustomError.BadRequestError('Information does not match');
+  }
+
+  //yes => see if change password token exist
+  const existingToken = user.passwordToken;
+  //token exist => return token
+  if (existingToken) {
+    return res.status(StatusCodes.OK).json({ passwordToken: existingToken });
+  }
+  //token not exist => create token (contains user email) and return
+  const tokenUser = createTokenUser(user);
+  const passwordToken = createJWT({ payload: { user: tokenUser } });
+
+  user.passwordToken = passwordToken;
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ passwordToken });
+};
+
+const verifyPasswordToken = async (req, res) => {
+  const { passwordToken } = req.params;
+  let payload;
+
+  try {
+    payload = isTokenValid(passwordToken);
+    if (payload.user) {
+      return res.status(StatusCodes.OK).json({ success: true });
+    }
+
+    throw new CustomError.UnauthorizedError('Unauthorized to visit this page');
+  } catch (error) {
+    throw new CustomError.UnauthorizedError('Unauthorized to visit this page');
+  }
 };
 
 const resetPassword = async (req, res) => {
-  res.status(200).send('resetPassword');
+  const { passwordToken } = req.params;
+  const { newPassword } = req.body;
+
+  //check if passwordToken valid
+  const payload = isTokenValid(passwordToken);
+  //update password
+  const user = await User.findOne({ _id: payload.user.userId });
+  user.password = newPassword;
+  user.passwordToken = null;
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ success: true, msg: 'Password updated' });
 };
 
 module.exports = {
@@ -164,6 +249,8 @@ module.exports = {
   register,
   logout,
   verifyEmail,
-  forgotPassword,
+  verifySecurityAnswer,
+  verifyForgetPasswordInfo,
+  verifyPasswordToken,
   resetPassword,
 };
