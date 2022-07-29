@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Logo, FormRow, Select } from '../components';
+import { Logo, FormRow, Select, CustomDatePicker } from '../components';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../features/user/userSlice';
@@ -119,8 +119,8 @@ const Login = () => {
         {isLogin || (
           <>
             <FormRow name='birthday' showLabelOnly={true} />
-            <DatePicker
-              selected={userInput.birthday}
+            <CustomDatePicker
+              selectedDate={userInput.birthday}
               onChange={(date) => onBirthdayChange(date)}
             />
             <Select
@@ -138,6 +138,7 @@ const Login = () => {
             />
           </>
         )}
+        {isLogin && <a href='/forget-password'>Forget password</a>}
         <button className='primary-btn btn' onClick={submitForm}>
           {isLogin ? 'login' : 'register'}
         </button>

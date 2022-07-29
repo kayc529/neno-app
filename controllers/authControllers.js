@@ -181,7 +181,9 @@ const verifyForgetPasswordInfo = async (req, res) => {
   }
 
   //return security question
-  res.status(StatusCodes.OK).json({ securityQuestion: user.securityQuestion });
+  res
+    .status(StatusCodes.OK)
+    .json({ success: true, securityQuestion: user.securityQuestion });
 };
 
 const verifySecurityAnswer = async (req, res) => {
@@ -215,8 +217,8 @@ const verifySecurityAnswer = async (req, res) => {
 
 const verifyPasswordToken = async (req, res) => {
   const { passwordToken } = req.params;
+  console.log(passwordToken);
   let payload;
-
   try {
     payload = isTokenValid(passwordToken);
     if (payload.user) {
@@ -235,8 +237,18 @@ const resetPassword = async (req, res) => {
 
   //check if passwordToken valid
   const payload = isTokenValid(passwordToken);
+
   //update password
   const user = await User.findOne({ _id: payload.user.userId });
+
+  const isMatch = await user.comparePassword(newPassword);
+
+  if (isMatch) {
+    throw new CustomError.BadRequestError(
+      'You cannot reset to the same password'
+    );
+  }
+
   user.password = newPassword;
   user.passwordToken = null;
   await user.save();

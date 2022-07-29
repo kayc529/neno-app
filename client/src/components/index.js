@@ -8,6 +8,7 @@ import MemoTag from './MemoTag';
 import Loader from './Loader';
 import DialogModal from './DialogModal';
 import Select from './Select';
+import CustomDatePicker from './CustomDatePicker';
 
 export {
   FormRow,
@@ -20,4 +21,5 @@ export {
   Loader,
   DialogModal,
   Select,
+  CustomDatePicker,
 };

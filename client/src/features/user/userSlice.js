@@ -8,6 +8,10 @@ import {
   loginUserThunk,
   registerUserThunk,
   logoutUserThunk,
+  getSecurityQuestionThunk,
+  verifySecurityAnswerThunk,
+  verifyPasswordTokenThunk,
+  resetPasswordThunk,
 } from './userThunk';
 import { toastMessage, MessageTypes } from '../../utils/toast';
 
@@ -15,6 +19,10 @@ const initialState = {
   isLoading: false,
   user: getUserFromLocalStorage(),
   isSidebarOpen: false,
+  securityQuestion: '',
+  passwordToken: '',
+  isPasswordTokenValid: false,
+  isResetPasswordSuccessful: false,
 };
 
 export const loginUser = createAsyncThunk(
@@ -35,6 +43,38 @@ export const logoutUser = createAsyncThunk(
   'user/logoutUser',
   async (_, thunkAPI) => {
     return logoutUserThunk('/auth/logout', thunkAPI);
+  }
+);
+
+export const getSecurityQuestion = createAsyncThunk(
+  'user/getSecurityQuestion',
+  async (info, thunkAPI) => {
+    return getSecurityQuestionThunk('/auth/get-security', info, thunkAPI);
+  }
+);
+
+export const verifySecurityAnswer = createAsyncThunk(
+  'user/verifySecurityAnswer',
+  async (info, thunkAPI) => {
+    return verifySecurityAnswerThunk('/auth/forgot-password', info, thunkAPI);
+  }
+);
+
+export const verifyPasswordToken = createAsyncThunk(
+  'user/verifyPasswordToken',
+  async (passwordToken, thunkAPI) => {
+    return verifyPasswordTokenThunk(`/auth/reset-password/${passwordToken}`);
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'user/resetPassword',
+  async (info, thunkAPI) => {
+    return resetPasswordThunk(
+      `/auth/reset-password/${info.passwordToken}`,
+      info.newPassword,
+      thunkAPI
+    );
   }
 );
 
@@ -93,6 +133,55 @@ const userSlice = createSlice({
     [logoutUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+    },
+    [getSecurityQuestion.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [getSecurityQuestion.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      state.securityQuestion = payload.securityQuestion;
+    },
+    [getSecurityQuestion.rejected]: (state, { payload }) => {
+      console.log(payload);
+      state.isLoading = false;
+      toastMessage(payload, MessageTypes.ERROR);
+    },
+    [verifySecurityAnswer.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [verifySecurityAnswer.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      state.passwordToken = payload.passwordToken;
+    },
+    [verifySecurityAnswer.rejected]: (state, { payload }) => {
+      console.log(payload);
+      state.isLoading = false;
+      toastMessage(payload, MessageTypes.ERROR);
+    },
+    [verifyPasswordToken.pending]: (state) => {
+      state.isLoading = true;
+      state.isPasswordTokenValid = false;
+    },
+    [verifyPasswordToken.fulfilled]: (state) => {
+      state.isLoading = false;
+      state.isPasswordTokenValid = true;
+    },
+    [verifyPasswordToken.rejected]: (state, { payload }) => {
+      console.log(payload);
+      state.isLoading = false;
+      state.isPasswordTokenValid = false;
+      toastMessage(payload, MessageTypes.ERROR);
+    },
+    [resetPassword.pending]: (state) => {
+      state.isResetPasswordSuccessful = false;
+    },
+    [resetPassword.fulfilled]: (state) => {
+      state.isResetPasswordSuccessful = true;
+    },
+    [resetPassword.rejected]: (state, { payload }) => {
+      console.log(payload);
+      state.isResetPasswordSuccessful = false;
+      toastMessage(payload, MessageTypes.ERROR);
     },
   },
 });
