@@ -6,7 +6,7 @@ import Container from './Container';
 import Memo from './Memo';
 import MemoTag from './MemoTag';
 import Loader from './Loader';
-import DialogModal from './DialogModal';
+import Dialog from './Dialog';
 import Select from './Select';
 import CustomDatePicker from './CustomDatePicker';
 
@@ -19,7 +19,7 @@ export {
   Memo,
   MemoTag,
   Loader,
-  DialogModal,
+  Dialog,
   Select,
   CustomDatePicker,
 };

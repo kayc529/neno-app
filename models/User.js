@@ -61,7 +61,6 @@ UserSchema.pre('save', async function () {
   //hash password before saving in db
   //prevent overwriting the password when saving other changes
   if (!this.isModified('password') && !this.isModified('securityAnswer')) {
-    console.log('no hashing needed');
     return;
   }
 

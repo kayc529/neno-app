@@ -70,3 +70,21 @@ body {
     font-size: 24px;
     border-radius: 0.45rem;
 }
+
+.Modal {
+    position: relative;
+    margin: 10% auto 0 auto;
+    width:30%;
+    min-width: 450px;
+    background-color: white;
+    border-radius: 12px;
+}
+
+.Overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.3);
+  }

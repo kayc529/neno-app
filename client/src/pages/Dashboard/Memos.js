@@ -5,6 +5,7 @@ import { Container, Memo, Loader } from '../../components';
 import { createMemo, getAllMemos } from '../../features/memo/memoSlice';
 import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
+import { MessageTypes, toastMessage } from '../../utils/toast';
 
 const Memos = () => {
   const { memos, currentMemo, isLoading } = useSelector((state) => state.memos);
@@ -12,19 +13,31 @@ const Memos = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(getAllMemos({}));
-  }, [dispatch]);
+    getMemos();
+  }, []);
 
-  //when new memo is created
+  //navigate to edit memo page right after a new memo is created
   useEffect(() => {
     if (currentMemo) {
       navigate(`../memos/${currentMemo._id}`, { replace: false, to: 'memo' });
     }
   }, [currentMemo, navigate]);
 
-  const addMemo = () => {
-    console.log('add memo');
-    dispatch(createMemo());
+  const getMemos = async () => {
+    try {
+      await dispatch(getAllMemos({}));
+    } catch (error) {
+      toastMessage('Failed to get memos', MessageTypes.ERROR);
+    }
+  };
+
+  const addMemo = async () => {
+    try {
+      await dispatch(createMemo());
+    } catch (error) {
+      console.log(error);
+      toastMessage('Failed to create new memo', MessageTypes.ERROR);
+    }
   };
 
   return (

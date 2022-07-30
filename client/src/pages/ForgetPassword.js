@@ -27,7 +27,7 @@ const ForgetPassword = () => {
     }
   }, [passwordToken, navigate]);
 
-  const submitInfo = () => {
+  const submitInfo = async () => {
     if (!email || !birthday) {
       toastMessage(
         'Please fill in your email and birthday',
@@ -37,17 +37,27 @@ const ForgetPassword = () => {
     }
 
     const info = { email, birthday };
-    dispatch(getSecurityQuestion(info));
+
+    try {
+      await dispatch(getSecurityQuestion(info));
+    } catch (error) {
+      console.log('submit info: ', error);
+      toastMessage('Invalid information', MessageTypes.ERROR);
+    }
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (!email || !answer) {
       toastMessage('Please provide email and answer', MessageTypes.ERROR);
       return;
     }
 
     const info = { email, securityAnswer: answer };
-    dispatch(verifySecurityAnswer(info));
+    try {
+      await dispatch(verifySecurityAnswer(info));
+    } catch (error) {
+      toastMessage('Invalid information', MessageTypes.ERROR);
+    }
   };
 
   return (

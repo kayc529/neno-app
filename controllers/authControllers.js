@@ -217,7 +217,6 @@ const verifySecurityAnswer = async (req, res) => {
 
 const verifyPasswordToken = async (req, res) => {
   const { passwordToken } = req.params;
-  console.log(passwordToken);
   let payload;
   try {
     payload = isTokenValid(passwordToken);

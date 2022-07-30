@@ -12,6 +12,7 @@ const CustomDatePicker = ({ selectedDate, onChange }) => {
       dropdownMode='select'
       disabledKeyboardNavigation
       locale='en-US'
+      maxDate={new Date()}
     />
   );
 };

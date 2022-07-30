@@ -4,9 +4,7 @@ import { Logo, FormRow, Select, CustomDatePicker } from '../components';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../features/user/userSlice';
-import { securityQuestions } from '../utils/options';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { securityQuestions } from '../constants';
 import { toastMessage, MessageTypes } from '../utils/toast';
 
 const initUserInput = {

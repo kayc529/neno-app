@@ -23,6 +23,10 @@ const initialState = {
   passwordToken: '',
   isPasswordTokenValid: false,
   isResetPasswordSuccessful: false,
+  showDialog: false,
+  dialogType: '',
+  dialogTitle: '',
+  dialogMessage: '',
 };
 
 export const loginUser = createAsyncThunk(
@@ -89,6 +93,21 @@ const userSlice = createSlice({
       removeUserFromLocalStorage();
       state.user = null;
     },
+    toggleShowDialog: (state, action) => {
+      if (!state.showDialog) {
+        //update title and message from action payload
+        const { type, message, title } = action.payload;
+        state.dialogType = type || '';
+        state.dialogMessage = message || '';
+        state.dialogTitle = title || '';
+      } else {
+        //reset title and message
+        state.dialogType = '';
+        state.dialogMessage = '';
+        state.dialogTitle = '';
+      }
+      state.showDialog = !state.showDialog;
+    },
   },
   extraReducers: {
     [loginUser.pending]: (state) => {
@@ -103,7 +122,7 @@ const userSlice = createSlice({
     },
     [loginUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
-      console.log(payload);
+      console.error(payload);
       toastMessage('Login failed', MessageTypes.ERROR);
     },
     [registerUser.pending]: (state) => {
@@ -144,7 +163,6 @@ const userSlice = createSlice({
     [getSecurityQuestion.rejected]: (state, { payload }) => {
       console.log(payload);
       state.isLoading = false;
-      toastMessage(payload, MessageTypes.ERROR);
     },
     [verifySecurityAnswer.pending]: (state) => {
       state.isLoading = true;
@@ -156,7 +174,6 @@ const userSlice = createSlice({
     [verifySecurityAnswer.rejected]: (state, { payload }) => {
       console.log(payload);
       state.isLoading = false;
-      toastMessage(payload, MessageTypes.ERROR);
     },
     [verifyPasswordToken.pending]: (state) => {
       state.isLoading = true;
@@ -186,5 +203,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { toggleSideBar, removeUser } = userSlice.actions;
+export const { toggleSideBar, removeUser, toggleShowDialog } =
+  userSlice.actions;
 export default userSlice.reducer;

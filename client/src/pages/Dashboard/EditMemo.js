@@ -19,44 +19,35 @@ import {
 } from 'react-icons/ai';
 import { BiArchiveIn } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
+import Dialog from '../../components/Dialog';
+import { toggleShowDialog } from '../../features/user/userSlice';
+import { MessageTypes, toastMessage } from '../../utils/toast';
+import { DialogTypes } from '../../constants';
 
 const EditMemo = () => {
-  const [memoId, setMemoId] = useState('');
   const [data, setData] = useState({});
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [showAddTag, setShowAddTag] = useState(false);
-  const { isLoading, currentMemo, isSaving, isDeleted, canSave } = useSelector(
+  const { isLoading, currentMemo, isSaving, canSave } = useSelector(
     (state) => state.memos
   );
+  const { dialogType } = useSelector((state) => state.user);
   const tagInputRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const getMemoIdFromUrl = () => {
-    const url = document.URL;
-    const id = url.substring(url.lastIndexOf('/') + 1);
-    if (id) {
-      setMemoId(id);
-    }
-  };
-
   useEffect(() => {
-    getMemoIdFromUrl();
+    getCurrentMemo();
   }, []);
 
   useEffect(() => {
+    //if the memo if passed from the previous page
     if (currentMemo) {
       setData(currentMemo);
       setTagsArr();
     }
   }, [currentMemo]);
-
-  useEffect(() => {
-    if (memoId) {
-      dispatch(getMemo(memoId));
-    }
-  }, [memoId, dispatch]);
 
   //auto-focus add tag input field when it's opened
   useEffect(() => {
@@ -65,16 +56,26 @@ const EditMemo = () => {
     }
   }, [showAddTag]);
 
-  //go back to home page once the memo is deleted
-  useEffect(() => {
-    if (isDeleted) {
-      goBackHome();
+  const getMemoIdFromUrl = () => {
+    const url = document.URL;
+    const id = url.substring(url.lastIndexOf('/') + 1);
+    return id;
+  };
+
+  const getCurrentMemo = async () => {
+    try {
+      const memoId = getMemoIdFromUrl();
+      if (!memoId) {
+        throw new Error();
+      }
+      await dispatch(getMemo(memoId));
+    } catch (error) {
+      toastMessage('Failed to get memo', MessageTypes.ERROR);
     }
-  }, [isDeleted]);
+  };
 
   const setTagsArr = () => {
     const temp = currentMemo.tags?.split('+') || [];
-    console.log(temp);
     setTags(temp);
   };
 
@@ -130,22 +131,102 @@ const EditMemo = () => {
     }
   };
 
-  const goBackHome = () => {
-    dispatch(resetEditMemoStates());
-    navigate('../', { replace: false, to: '/' });
+  const onBack = () => {
+    if (canSave) {
+      //ask if user do not want to save the
+      dispatch(
+        toggleShowDialog({
+          type: DialogTypes.MEMO_ALERT_UNSAVED,
+          title: 'Memo unsaved',
+          message: 'Do you wish to go back without saving?',
+        })
+      );
+    } else {
+      goBackHome();
+    }
+  };
+  const goBackHome = async () => {
+    await dispatch(resetEditMemoStates());
+    // navigate('../', { replace: false, to: '/' });
+    navigate(-1);
   };
 
-  const onSaveMemo = () => {
+  const onSaveMemo = async () => {
     //if no changes have been made, don't allow user to save
     if (!canSave) return;
 
     const tagsString = tags.join('+');
     let updatedMemo = { ...data, tags: tagsString };
-    dispatch(updateMemo(updatedMemo));
+    try {
+      await dispatch(updateMemo(updatedMemo));
+      toastMessage('Memo saved', MessageTypes.SUCCESS);
+    } catch (error) {
+      toastMessage('Failed to save memo', MessageTypes.ERROR);
+    }
   };
 
-  const onDeleteMemo = () => {
-    dispatch(deleteMemo(data));
+  const onDeleteMemo = async () => {
+    dispatch(
+      toggleShowDialog({
+        type: DialogTypes.MEMO_CONFIRM_DELETE,
+        title: 'Delete Memo',
+        message: 'Are you sure to delete this memo?',
+      })
+    );
+  };
+
+  const confirmDeleteMemo = async () => {
+    //close dialog
+    dispatch(toggleShowDialog());
+    try {
+      await dispatch(deleteMemo(data));
+      toastMessage('Memo deleted', MessageTypes.SUCCESS);
+      goBackHome();
+    } catch (error) {
+      toastMessage('Failed to delete memo', MessageTypes.ERROR);
+    }
+  };
+
+  const onArchiveMemo = () => {
+    dispatch(
+      toggleShowDialog({
+        type: DialogTypes.MEMO_CONFIRM_ARCHIVE,
+        title: 'Archive Memo',
+        message: 'Are you sure to archive this memo?',
+      })
+    );
+  };
+
+  const confirmArchiveMemo = async () => {
+    //close dialog
+    dispatch(toggleShowDialog());
+    const updatedMemo = { ...data, isArchived: true };
+    try {
+      await dispatch(updateMemo(updatedMemo));
+      toastMessage('Memo archived', MessageTypes.SUCCESS);
+      goBackHome();
+    } catch (error) {
+      toastMessage(error, MessageTypes.ERROR);
+    }
+  };
+
+  const onConfirm = () => {
+    switch (dialogType) {
+      case DialogTypes.MEMO_CONFIRM_ARCHIVE:
+        confirmArchiveMemo();
+        break;
+      case DialogTypes.MEMO_CONFIRM_DELETE:
+        confirmDeleteMemo();
+        break;
+      case DialogTypes.MEMO_ALERT_UNSAVED:
+        dispatch(toggleShowDialog());
+        goBackHome();
+        break;
+      default:
+        //do nothing and close dialog by default
+        dispatch(toggleShowDialog());
+        break;
+    }
   };
 
   if (isLoading) {
@@ -175,10 +256,11 @@ const EditMemo = () => {
 
   return (
     <Wrapper>
+      <Dialog confirmCallback={onConfirm} />
       <Container>
         <div className='row top-bar'>
           {/* BACK BUTTON */}
-          <AiOutlineArrowLeft className='icon-btn' onClick={goBackHome} />
+          <AiOutlineArrowLeft className='icon-btn' onClick={onBack} />
           <div className='save-button-container'>
             {/* SAVE MEMO BUTTON */}
             {isSaving ? (
@@ -194,7 +276,10 @@ const EditMemo = () => {
               />
             )}
             {/* ARCHIVE MEMO BUTTON */}
-            <BiArchiveIn className='icon-btn icon-spacing' />
+            <BiArchiveIn
+              className='icon-btn icon-spacing'
+              onClick={onArchiveMemo}
+            />
             {/* DELETE MEMO BUTTON */}
             <AiOutlineDelete className='icon-btn' onClick={onDeleteMemo} />
           </div>

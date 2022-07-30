@@ -6,7 +6,6 @@ import {
   updateMemoThunk,
   deleteMemoThunk,
 } from './memoThunk';
-import { toastMessage, MessageTypes } from '../../utils/toast';
 
 const initialState = {
   memos: [],
@@ -14,7 +13,6 @@ const initialState = {
   isLoading: false,
   isSaving: false,
   canSave: false,
-  isDeleted: false,
   searchOptions: {
     page: 1,
     keywords: '',
@@ -73,7 +71,7 @@ const memoSlice = createSlice({
   initialState,
   reducers: {
     resetEditMemoStates(state) {
-      return { ...state, currentMemo: null, isDeleted: false };
+      return { ...state, currentMemo: null };
     },
     enableSave(state) {
       return { ...state, canSave: true };
@@ -90,8 +88,6 @@ const memoSlice = createSlice({
     },
     [getAllMemos.rejected]: (state, { payload }) => {
       state.isLoading = false;
-      console.log(payload);
-      toastMessage('Failed to get memos', MessageTypes.ERROR);
     },
     [getMemo.pending]: (state) => {
       state.isLoading = true;
@@ -105,7 +101,6 @@ const memoSlice = createSlice({
     [getMemo.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
-      toastMessage('Failed to get memo', MessageTypes.ERROR);
     },
     [createMemo.pending]: (state) => {
       state.isLoading = true;
@@ -119,7 +114,6 @@ const memoSlice = createSlice({
     [createMemo.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
-      toastMessage('Failed to create memo', MessageTypes.ERROR);
     },
     [updateMemo.pending]: (state) => {
       state.isSaving = true;
@@ -129,21 +123,19 @@ const memoSlice = createSlice({
       state.isSaving = false;
       state.currentMemo = memo;
       state.canSave = false;
-      toastMessage('Memo saved!', MessageTypes.SUCCESS);
     },
     [updateMemo.rejected]: (state, { payload }) => {
       state.isSaving = false;
       console.log(payload);
-      toastMessage('Failed to update memo', MessageTypes.ERROR);
     },
-    [deleteMemo.pending]: (state) => {},
+    [deleteMemo.pending]: (state) => {
+      state.isLoading = true;
+    },
     [deleteMemo.fulfilled]: (state) => {
-      state.isDeleted = true;
-      toastMessage('Memo deleted!', MessageTypes.SUCCESS);
+      state.isLoading = false;
     },
-    [deleteMemo.rejected]: (state, { payload }) => {
-      console.log(payload);
-      toastMessage('Failed to delete memo', MessageTypes.ERROR);
+    [deleteMemo.rejected]: (state) => {
+      state.isLoading = false;
     },
     [toggleMemoPin.pending]: () => {},
     [toggleMemoPin.fulfilled]: () => {},
