@@ -1,7 +1,7 @@
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const CustomDatePicker = ({ selectedDate, onChange }) => {
+const CustomDatePicker = ({ selectedDate, onChange, locale = 'en-US' }) => {
   return (
     <DatePicker
       selected={new Date(selectedDate.setHours(0, 0, 0, 0))}
@@ -11,7 +11,7 @@ const CustomDatePicker = ({ selectedDate, onChange }) => {
       showYearDropdown
       dropdownMode='select'
       disabledKeyboardNavigation
-      locale='en-US'
+      locale={locale}
       maxDate={new Date()}
     />
   );

@@ -13,17 +13,12 @@ const initialState = {
   isLoading: false,
   isSaving: false,
   canSave: false,
-  searchOptions: {
-    page: 1,
-    keywords: '',
-  }, //get from local storage
-  sorting: null,
 };
 
 export const getAllMemos = createAsyncThunk(
   'memos/getAllMemos',
-  async (searchOptions, thunkAPI) => {
-    return getAllMemosThunk('/memos', searchOptions, thunkAPI);
+  async (searchQueryStr, thunkAPI) => {
+    return getAllMemosThunk(`/memos${searchQueryStr}`, thunkAPI);
   }
 );
 
@@ -71,7 +66,7 @@ const memoSlice = createSlice({
   initialState,
   reducers: {
     resetEditMemoStates(state) {
-      return { ...state, currentMemo: null };
+      return { ...state, currentMemo: null, canSave: false };
     },
     enableSave(state) {
       return { ...state, canSave: true };

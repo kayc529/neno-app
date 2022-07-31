@@ -7,12 +7,19 @@ const FormRow = ({
   onChange,
   showLabel = true,
   showLabelOnly = false,
+  placeholder = '',
 }) => {
   return (
     <Wrapper>
       {showLabel && <label>{name}</label>}
       {showLabelOnly || (
-        <input type={type} name={name} onChange={onChange} value={value} />
+        <input
+          type={type}
+          name={name}
+          onChange={onChange}
+          value={value}
+          placeholder={placeholder}
+        />
       )}
     </Wrapper>
   );

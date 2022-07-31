@@ -1,10 +1,8 @@
 import customFetch from '../../utils/axios';
 
-export const getAllMemosThunk = async (url, searchOptions, thunkAPI) => {
+export const getAllMemosThunk = async (url, thunkAPI) => {
   try {
-    //put search options into query
-    const urlWithQuery = url;
-    const res = await customFetch.get(urlWithQuery);
+    const res = await customFetch.get(url);
     return res.data;
   } catch (error) {
     console.log(error);
@@ -14,6 +12,7 @@ export const getAllMemosThunk = async (url, searchOptions, thunkAPI) => {
 
 export const getMemoThunk = async (url, thunkAPI) => {
   try {
+    console.log(url);
     const res = await customFetch.get(url);
     return res.data;
   } catch (error) {

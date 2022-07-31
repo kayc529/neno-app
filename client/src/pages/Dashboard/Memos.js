@@ -1,20 +1,22 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { Container, Memo, Loader } from '../../components';
+import { Container, Memo, Loader, SearchBar } from '../../components';
 import { createMemo, getAllMemos } from '../../features/memo/memoSlice';
 import { AiOutlinePlusCircle } from 'react-icons/ai';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageTypes, toastMessage } from '../../utils/toast';
+import { generateSearchQueryString } from '../../utils/searchQuery';
 
 const Memos = () => {
   const { memos, currentMemo, isLoading } = useSelector((state) => state.memos);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     getMemos();
-  }, []);
+  }, [searchParams]);
 
   //navigate to edit memo page right after a new memo is created
   useEffect(() => {
@@ -25,7 +27,11 @@ const Memos = () => {
 
   const getMemos = async () => {
     try {
-      await dispatch(getAllMemos({}));
+      const keyword = searchParams.get('keyword');
+      const pinned = searchParams.get('pinned');
+      const sorting = searchParams.get('sorting');
+      const queryStr = generateSearchQueryString({ keyword, pinned, sorting });
+      await dispatch(getAllMemos(queryStr));
     } catch (error) {
       toastMessage('Failed to get memos', MessageTypes.ERROR);
     }
@@ -43,7 +49,7 @@ const Memos = () => {
   return (
     <Wrapper>
       <Container>
-        <div className='filters'>search bar and filter options</div>
+        <SearchBar />
         <AiOutlinePlusCircle className='add-button' onClick={addMemo} />
         {isLoading ? (
           <Loader />

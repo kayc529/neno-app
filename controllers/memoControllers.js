@@ -5,10 +5,45 @@ const { checkPermission } = require('../utils');
 
 const getAllMemos = async (req, res) => {
   const user = req.user;
+  const { pinned, keyword, start, end, sorting } = req.query;
+  const queryObject = {};
 
-  const memos = await Memo.find({
-    user: user.userId,
-  });
+  queryObject.user = user.userId;
+
+  if (pinned) {
+    queryObject.isPinned = pinned === 'true';
+  }
+
+  if (keyword) {
+    const re = new RegExp(keyword, 'i');
+    queryObject.$or = [
+      {
+        content: { $regex: re },
+      },
+      { title: { $regex: re } },
+      { tags: { $regex: re } },
+    ];
+  }
+
+  if (start) {
+    queryObject.createdAt = { $gte: new Date(start) };
+  }
+
+  if (end) {
+    queryObject.createdAt = queryObject.createdAt
+      ? { ...queryObject.createdAt, $lte: new Date(end) }
+      : { $lte: new Date(end) };
+  }
+
+  //filter
+  let result = Memo.find(queryObject);
+
+  //sorting -:desc
+  result = sorting
+    ? result.sort(`-isPinned ${sorting}`)
+    : result.sort(`-isPinned -updatedAt`);
+
+  const memos = await result;
 
   res.status(StatusCodes.OK).json({
     success: true,
