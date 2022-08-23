@@ -7,9 +7,12 @@ import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageTypes, toastMessage } from '../../utils/toast';
 import { generateSearchQueryString } from '../../utils/searchQuery';
+import { Pagination } from '@mui/material';
 
 const Memos = () => {
-  const { memos, currentMemo, isLoading } = useSelector((state) => state.memos);
+  const { memos, currentMemo, isLoading, numOfPages } = useSelector(
+    (state) => state.memos
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,7 +33,18 @@ const Memos = () => {
       const keyword = searchParams.get('keyword');
       const pinned = searchParams.get('pinned');
       const sorting = searchParams.get('sorting');
-      const queryStr = generateSearchQueryString({ keyword, pinned, sorting });
+      const start = searchParams.get('start');
+      const end = searchParams.get('end');
+      const page = searchParams.get('page');
+
+      const queryStr = generateSearchQueryString({
+        keyword,
+        pinned,
+        sorting,
+        start,
+        end,
+        page,
+      });
       await dispatch(getAllMemos(queryStr));
     } catch (error) {
       toastMessage('Failed to get memos', MessageTypes.ERROR);
@@ -46,6 +60,32 @@ const Memos = () => {
     }
   };
 
+  const handlePageChange = (e) => {
+    const keyword = searchParams.get('keyword');
+    const pinned = searchParams.get('pinned');
+    const sorting = searchParams.get('sorting');
+    const start = searchParams.get('start');
+    const end = searchParams.get('end');
+    const page = e.target.outerText;
+    const queryStr = generateSearchQueryString({
+      keyword,
+      pinned,
+      sorting,
+      start,
+      end,
+      page,
+    });
+    navigate(queryStr);
+  };
+
+  const getPageNumber = () => {
+    let page = Number(searchParams.get('page')) || 1;
+    if (page > numOfPages) {
+      page = numOfPages;
+    }
+    return page;
+  };
+
   return (
     <Wrapper>
       <Container>
@@ -54,11 +94,20 @@ const Memos = () => {
         {isLoading ? (
           <Loader />
         ) : (
-          <div className='memos'>
-            {memos.map((memo, index) => {
-              return <Memo key={memo._id} {...memo} />;
-            })}
-          </div>
+          <>
+            <div className='memos'>
+              {memos.map((memo, index) => {
+                return <Memo key={memo._id} {...memo} />;
+              })}
+            </div>
+            <div className='pagination-container'>
+              <Pagination
+                count={numOfPages}
+                page={getPageNumber()}
+                onChange={handlePageChange}
+              />
+            </div>
+          </>
         )}
       </Container>
     </Wrapper>
@@ -86,6 +135,12 @@ const Wrapper = styled.main`
     align-self: center;
     margin: 20px 0;
     cursor: pointer;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
   }
 `;
 

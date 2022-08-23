@@ -5,7 +5,7 @@ const { checkPermission } = require('../utils');
 
 const getAllMemos = async (req, res) => {
   const user = req.user;
-  const { pinned, keyword, start, end, sorting } = req.query;
+  const { pinned, keyword, start, end, sorting, page } = req.query;
   const queryObject = {};
 
   queryObject.user = user.userId;
@@ -30,9 +30,12 @@ const getAllMemos = async (req, res) => {
   }
 
   if (end) {
+    //set to end of the day
+    let endDate = new Date(end);
+    endDate.setUTCHours(23, 59, 59, 999);
     queryObject.createdAt = queryObject.createdAt
-      ? { ...queryObject.createdAt, $lte: new Date(end) }
-      : { $lte: new Date(end) };
+      ? { ...queryObject.createdAt, $lte: endDate }
+      : { $lte: endDate };
   }
 
   //filter
@@ -43,12 +46,29 @@ const getAllMemos = async (req, res) => {
     ? result.sort(`-isPinned ${sorting}`)
     : result.sort(`-isPinned -updatedAt`);
 
-  const memos = await result;
+  //get memo with query
+  let memos = await result;
+
+  //pagination
+  const ITEM_PER_PAGE = 12;
+  const count = memos.length;
+  const numOfPages = Math.ceil(memos.length / ITEM_PER_PAGE);
+
+  let pageNum = Number(page) || 1;
+  pageNum = pageNum > numOfPages ? numOfPages : pageNum;
+  const startingIndex = (pageNum - 1) * ITEM_PER_PAGE;
+  const endingIndex =
+    startingIndex + ITEM_PER_PAGE >= count
+      ? count
+      : startingIndex + ITEM_PER_PAGE;
+
+  memos = memos.slice(startingIndex, endingIndex);
 
   res.status(StatusCodes.OK).json({
     success: true,
     memos,
-    count: memos.length,
+    count,
+    numOfPages: numOfPages || 1,
   });
 };
 

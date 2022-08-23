@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { AiFillPushpin, AiOutlinePushpin } from 'react-icons/ai';
 import { useDispatch } from 'react-redux';
 import { toggleMemoPin } from '../features/memo/memoSlice';
+import { convertToLocaleDate } from '../utils/date';
 
-const Memo = ({ _id, title, content, isPinned }) => {
+const Memo = ({ _id, title, content, isPinned, createdAt, updatedAt }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -22,6 +23,7 @@ const Memo = ({ _id, title, content, isPinned }) => {
   return (
     <Wrapper>
       <div className='clickable' onClick={openMemo}></div>
+      <h4>{convertToLocaleDate(createdAt)}</h4>
       {isPinned ? (
         <AiFillPushpin className='pin' onClick={togglePin} />
       ) : (

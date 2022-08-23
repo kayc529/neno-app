@@ -9,6 +9,7 @@ import {
 
 const initialState = {
   memos: [],
+  numOfPages: 1,
   currentMemo: null,
   isLoading: false,
   isSaving: false,
@@ -77,9 +78,10 @@ const memoSlice = createSlice({
       state.isLoading = true;
     },
     [getAllMemos.fulfilled]: (state, { payload }) => {
-      const { memos } = payload;
+      const { memos, numOfPages } = payload;
       state.isLoading = false;
       state.memos = memos;
+      state.numOfPages = numOfPages;
     },
     [getAllMemos.rejected]: (state, { payload }) => {
       state.isLoading = false;

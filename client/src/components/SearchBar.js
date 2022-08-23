@@ -4,11 +4,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { generateSearchQueryString } from '../utils/searchQuery';
 import { sortingOptions } from '../constants';
+import DateRangePicker from './DateRangePicker';
+import { getYearMonthDayFromDateStr } from '../utils/date';
 
 const SearchBar = () => {
   const [keyword, setKeyword] = useState('');
   const [pinned, setPinned] = useState('');
   const [sorting, setSorting] = useState(0);
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -20,6 +25,9 @@ const SearchBar = () => {
     const keywordParma = searchParams.get('keyword');
     const pinnedParma = searchParams.get('pinned');
     const sortingParma = searchParams.get('sorting');
+    const startDateParam = searchParams.get('start');
+    const endDateParam = searchParams.get('end');
+
     if (keywordParma) {
       setKeyword(keywordParma);
     }
@@ -35,6 +43,17 @@ const SearchBar = () => {
       }
       setSorting(sortingIndex);
     }
+
+    let tempDateRange = [null, null];
+    if (startDateParam) {
+      const [year, month, day] = getYearMonthDayFromDateStr(startDateParam);
+      tempDateRange[0] = new Date(year, month, day);
+    }
+    if (endDateParam) {
+      const [year, month, day] = getYearMonthDayFromDateStr(endDateParam);
+      tempDateRange[1] = new Date(year, month, day);
+    }
+    setDateRange(tempDateRange);
   };
 
   const handleKeywordChange = (e) => {
@@ -57,6 +76,9 @@ const SearchBar = () => {
       keyword,
       pinned,
       sorting: sortingOptions[sorting].value,
+      start: startDate,
+      end: endDate,
+      page: 1,
     });
     navigate(queryStr);
   };
@@ -89,6 +111,12 @@ const SearchBar = () => {
           );
         })}
       </select>
+      {/* date range picker */}
+      <DateRangePicker
+        startDate={startDate}
+        endDate={endDate}
+        onChange={setDateRange}
+      />
       {/* radio buttons */}
       <fieldset className='radio-btn-container'>
         <div className='row'>

@@ -10,6 +10,7 @@ import Dialog from './Dialog';
 import Select from './Select';
 import CustomDatePicker from './CustomDatePicker';
 import SearchBar from './SearchBar';
+import DateRangePicker from './DateRangePicker';
 
 export {
   FormRow,
@@ -24,4 +25,5 @@ export {
   Select,
   CustomDatePicker,
   SearchBar,
+  DateRangePicker,
 };
