@@ -3,12 +3,18 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const { checkPermission } = require('../utils');
 
+//PAGINATION CONSTANTS
+const ITEM_PER_PAGE = 12;
+
 const getAllMemos = async (req, res) => {
   const user = req.user;
   const { pinned, keyword, start, end, sorting, page } = req.query;
   const queryObject = {};
 
+  //get memos of that user only
   queryObject.user = user.userId;
+  //get unarchived memos only
+  queryObject.isArchived = false;
 
   if (pinned) {
     queryObject.isPinned = pinned === 'true';
@@ -49,11 +55,10 @@ const getAllMemos = async (req, res) => {
   //get memo with query
   let memos = await result;
 
+  //TODO optimization
   //pagination
-  const ITEM_PER_PAGE = 12;
   const count = memos.length;
   const numOfPages = Math.ceil(memos.length / ITEM_PER_PAGE);
-
   let pageNum = Number(page) || 1;
   pageNum = pageNum > numOfPages ? numOfPages : pageNum;
   const startingIndex = (pageNum - 1) * ITEM_PER_PAGE;
@@ -63,6 +68,56 @@ const getAllMemos = async (req, res) => {
       : startingIndex + ITEM_PER_PAGE;
 
   memos = memos.slice(startingIndex, endingIndex);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    memos,
+    count,
+    numOfPages: numOfPages || 1,
+  });
+};
+
+const getArchivedMemos = async (req, res) => {
+  console.log('ok?');
+  const user = req.user;
+  const { keyword, page } = req.query;
+  let queryObject = {};
+
+  queryObject.user = user.userId;
+  queryObject.isArchived = true;
+
+  if (keyword) {
+    const re = new RegExp(keyword, 'i');
+    queryObject.$or = [
+      {
+        content: { $regex: re },
+      },
+      { title: { $regex: re } },
+      { tags: { $regex: re } },
+    ];
+  }
+
+  //filter
+  let results = Memo.find(queryObject);
+  //sorting
+  results = results.sort('-updatedAt');
+
+  let memos = await results;
+
+  //TODO optimization
+  //pagination
+  const count = memos.length;
+  const numOfPages = Math.ceil(memos.length / ITEM_PER_PAGE);
+  let pageNum = Number(page) || 1;
+  pageNum = pageNum > numOfPages ? numOfPages : pageNum;
+  const startingIndex = (pageNum - 1) * ITEM_PER_PAGE;
+  const endingIndex =
+    startingIndex + ITEM_PER_PAGE >= count
+      ? count
+      : startingIndex + ITEM_PER_PAGE;
+
+  memos = memos.slice(startingIndex, endingIndex);
+  console.log('ok!');
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -136,4 +191,11 @@ const deleteMemo = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true });
 };
 
-module.exports = { getAllMemos, getMemo, createMemo, updateMemo, deleteMemo };
+module.exports = {
+  getAllMemos,
+  getArchivedMemos,
+  getMemo,
+  createMemo,
+  updateMemo,
+  deleteMemo,
+};

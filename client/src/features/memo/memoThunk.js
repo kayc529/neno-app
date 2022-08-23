@@ -10,6 +10,16 @@ export const getAllMemosThunk = async (url, thunkAPI) => {
   }
 };
 
+export const getArchivedMemosThunk = async (url, thunkAPI) => {
+  try {
+    const res = await customFetch.get(url);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    return thunkAPI.rejectWithValue(error.response.data.msg);
+  }
+};
+
 export const getMemoThunk = async (url, thunkAPI) => {
   try {
     console.log(url);

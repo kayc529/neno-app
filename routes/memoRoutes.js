@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getAllMemos,
+  getArchivedMemos,
   getMemo,
   createMemo,
   updateMemo,
@@ -13,6 +14,8 @@ router
   .route('/')
   .get(authenticateUser, getAllMemos)
   .post(authenticateUser, createMemo);
+
+router.route('/archive').get(authenticateUser, getArchivedMemos);
 
 router
   .route('/:id')

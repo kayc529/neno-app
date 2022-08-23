@@ -97,7 +97,7 @@ const Memos = () => {
           <>
             <div className='memos'>
               {memos.map((memo, index) => {
-                return <Memo key={memo._id} {...memo} />;
+                return <Memo key={memo._id} memo={memo} />;
               })}
             </div>
             <div className='pagination-container'>

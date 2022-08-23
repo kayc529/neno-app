@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { AiOutlineClose } from 'react-icons/ai';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toggleSideBar } from '../features/user/userSlice';
 import {
   Drawer,
@@ -13,7 +13,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
 } from '@mui/material';
 //icons
 import MemosIcon from '@mui/icons-material/InsertDriveFileOutlined';
@@ -21,10 +20,12 @@ import ArchiveIcon from '@mui/icons-material/Inventory2Outlined';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 
 const SideBar = () => {
+  //list item name must match route's pathname
   const listItems = ['Memos', 'Archive', 'Settings'];
   const { isSidebarOpen } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const closeSidebar = () => {
     dispatch(toggleSideBar());
@@ -44,19 +45,14 @@ const SideBar = () => {
   };
 
   const handleListButtonClick = (listItem) => {
-    switch (listItem) {
-      case 'Memos':
-        navigate('/', { replace: true });
-        return;
-      case 'Archive':
-        navigate('/archive', { replace: true });
-        return;
-      case 'Settings':
-        navigate('/settings', { replace: true });
-        return;
-      default:
-        return;
-    }
+    if (!listItems.includes(listItem)) return;
+
+    const destination =
+      listItem === 'Memos' ? '/' : `/${listItem.toLowerCase()}`;
+
+    //prevent refreshing if in the same page
+    if (location.pathname === destination) return;
+    navigate(destination, { replace: true });
   };
 
   return (
@@ -79,13 +75,6 @@ const SideBar = () => {
               </ListItemButton>
             </ListItem>
           ))}
-          {/* <Divider />
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{getListItemIcon('Settings')}</ListItemIcon>
-              <ListItemText primary={'Settings'} />
-            </ListItemButton>
-          </ListItem> */}
         </List>
       </Box>
     </Drawer>

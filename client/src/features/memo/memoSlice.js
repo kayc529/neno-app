@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   getAllMemosThunk,
+  getArchivedMemosThunk,
   getMemoThunk,
   createMemoThunk,
   updateMemoThunk,
@@ -23,6 +24,13 @@ export const getAllMemos = createAsyncThunk(
   }
 );
 
+export const getArchivedMemos = createAsyncThunk(
+  'memos/getArchivedMemos',
+  async (searchQueryStr, thunkAPI) => {
+    return getArchivedMemosThunk(`/memos/archive${searchQueryStr}`, thunkAPI);
+  }
+);
+
 export const getMemo = createAsyncThunk(
   'memo/getMemo',
   async (memoId, thunkAPI) => {
@@ -34,6 +42,13 @@ export const createMemo = createAsyncThunk(
   'memo/createMemo',
   async (_, thunkAPI) => {
     return createMemoThunk('/memos', thunkAPI);
+  }
+);
+
+export const unarchiveOrTogglePin = createAsyncThunk(
+  'memo/unarchiveOrTogglePin',
+  async (memo, thunkAPI) => {
+    return updateMemoThunk(`/memos/${memo._id}`, memo, thunkAPI);
   }
 );
 
@@ -86,6 +101,18 @@ const memoSlice = createSlice({
     [getAllMemos.rejected]: (state, { payload }) => {
       state.isLoading = false;
     },
+    [getArchivedMemos.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [getArchivedMemos.fulfilled]: (state, { payload }) => {
+      const { memos, numOfPages } = payload;
+      state.isLoading = false;
+      state.memos = memos;
+      state.numOfPages = numOfPages;
+    },
+    [getArchivedMemos.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+    },
     [getMemo.pending]: (state) => {
       state.isLoading = true;
       state.currentMemo = null;
@@ -123,6 +150,11 @@ const memoSlice = createSlice({
     },
     [updateMemo.rejected]: (state, { payload }) => {
       state.isSaving = false;
+      console.log(payload);
+    },
+    [unarchiveOrTogglePin.pending]: (state) => {},
+    [unarchiveOrTogglePin.fulfilled]: (state, { payload }) => {},
+    [unarchiveOrTogglePin.rejected]: (state, { payload }) => {
       console.log(payload);
     },
     [deleteMemo.pending]: (state) => {
