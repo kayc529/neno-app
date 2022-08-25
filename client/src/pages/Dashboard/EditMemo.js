@@ -8,6 +8,7 @@ import {
   updateMemo,
   deleteMemo,
   enableSave,
+  unarchiveOrTogglePin,
 } from '../../features/memo/memoSlice';
 import {
   AiOutlineArrowLeft,
@@ -75,6 +76,9 @@ const EditMemo = () => {
   };
 
   const setTagsArr = () => {
+    if (currentMemo.tags?.length === 0) {
+      return;
+    }
     const temp = currentMemo.tags?.split('+') || [];
     setTags(temp);
   };
@@ -202,7 +206,7 @@ const EditMemo = () => {
     dispatch(toggleShowDialog());
     const updatedMemo = { ...data, isArchived: true };
     try {
-      await dispatch(updateMemo(updatedMemo));
+      await dispatch(unarchiveOrTogglePin(updatedMemo));
       toastMessage('Memo archived', MessageTypes.SUCCESS);
       goBackHome();
     } catch (error) {

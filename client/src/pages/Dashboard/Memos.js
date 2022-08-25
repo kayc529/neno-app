@@ -2,7 +2,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Container, Memo, Loader, SearchBar } from '../../components';
-import { createMemo, getAllMemos } from '../../features/memo/memoSlice';
+import {
+  createMemo,
+  getAllMemos,
+  unarchiveOrTogglePin,
+} from '../../features/memo/memoSlice';
 import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageTypes, toastMessage } from '../../utils/toast';
@@ -60,6 +64,16 @@ const Memos = () => {
     }
   };
 
+  const togglePin = async (memoId, isPinned) => {
+    try {
+      const updatedMemo = { _id: memoId, isPinned: !isPinned };
+      await dispatch(unarchiveOrTogglePin(updatedMemo));
+      getMemos();
+    } catch (error) {
+      toastMessage('Failed to pin memo', MessageTypes.ERROR);
+    }
+  };
+
   const handlePageChange = (e) => {
     const keyword = searchParams.get('keyword');
     const pinned = searchParams.get('pinned');
@@ -97,7 +111,7 @@ const Memos = () => {
           <>
             <div className='memos'>
               {memos.map((memo, index) => {
-                return <Memo key={memo._id} memo={memo} />;
+                return <Memo key={memo._id} memo={memo} onPinned={togglePin} />;
               })}
             </div>
             <div className='pagination-container'>

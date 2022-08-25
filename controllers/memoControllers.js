@@ -78,7 +78,6 @@ const getAllMemos = async (req, res) => {
 };
 
 const getArchivedMemos = async (req, res) => {
-  console.log('ok?');
   const user = req.user;
   const { keyword, page } = req.query;
   let queryObject = {};
@@ -117,7 +116,6 @@ const getArchivedMemos = async (req, res) => {
       : startingIndex + ITEM_PER_PAGE;
 
   memos = memos.slice(startingIndex, endingIndex);
-  console.log('ok!');
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -160,14 +158,26 @@ const updateMemo = async (req, res) => {
 
   checkPermission(req.user.userId, memo.user);
 
+  let memoToUpdate = req.body;
+  let updateTimestamps = true;
+
+  //prevent timestamps from updating if the memo has the preventUpdate flag
+  //no change in updatedAt if the user pin or archive the memo
+  if (memoToUpdate.preventUpdate) {
+    updateTimestamps = false;
+    //remove the preventUpdate flag
+    delete memoToUpdate.preventUpdate;
+  }
+
   const updatedMemo = await Memo.findOneAndUpdate(
     {
       _id: memoId,
     },
-    req.body,
+    memoToUpdate,
     {
       runValidators: true,
       new: true,
+      timestamps: updateTimestamps,
     }
   );
 

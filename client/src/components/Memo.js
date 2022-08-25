@@ -2,8 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { AiFillPushpin, AiOutlinePushpin } from 'react-icons/ai';
-import { useDispatch } from 'react-redux';
-import { toggleMemoPin } from '../features/memo/memoSlice';
 import {
   convertToLocaleDate,
   convertToLocaleDateWithTime,
@@ -15,13 +13,13 @@ import { useState } from 'react';
 const Memo = ({
   memo,
   inArchive = false,
+  onPinned = null,
   onDeleted = null,
   onUnarchived = null,
 }) => {
   const menuItems = ['Delete', 'Unarchive'];
   const { _id, title, content, isPinned, createdAt, updatedAt } = memo;
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
   const [isHover, setIsHover] = useState(false);
   const open = Boolean(anchorEl);
@@ -33,9 +31,10 @@ const Memo = ({
     navigate(`../memos/${_id}`, { replace: false, to: 'memo' });
   };
 
-  const togglePin = () => {
-    //patch request to update pin state
-    dispatch(toggleMemoPin({ _id, isPinned: !isPinned }));
+  const togglePin = async () => {
+    if (onPinned) {
+      onPinned(_id, isPinned);
+    }
   };
 
   const handleMemoHover = () => {

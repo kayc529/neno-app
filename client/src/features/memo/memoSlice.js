@@ -48,7 +48,11 @@ export const createMemo = createAsyncThunk(
 export const unarchiveOrTogglePin = createAsyncThunk(
   'memo/unarchiveOrTogglePin',
   async (memo, thunkAPI) => {
-    return updateMemoThunk(`/memos/${memo._id}`, memo, thunkAPI);
+    return updateMemoThunk(
+      `/memos/${memo._id}`,
+      { ...memo, preventUpdate: true },
+      thunkAPI
+    );
   }
 );
 
