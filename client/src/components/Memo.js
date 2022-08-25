@@ -80,7 +80,7 @@ const Memo = ({
         onMouseLeave={handleMemoUnhover}
       >
         <div className={`content${isHover ? ' show' : ''}`}>
-          <p>{content || 'This memo is empty'}</p>
+          <p className='content-text'>{content || 'This memo is empty'}</p>
         </div>
       </div>
       {/* TOP LEFT MENU ICON IN ARCHIVE PAGE*/}
@@ -207,10 +207,15 @@ const Wrapper = styled.article`
     transition-duration: 0.8s;
     text-align: center;
     z-index: 1;
+    word-wrap: break-word;
   }
 
   .content.show {
     opacity: 1;
+  }
+
+  .content-text {
+    cursor: default;
   }
 
   .last-updated-text {

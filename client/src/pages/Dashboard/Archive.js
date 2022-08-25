@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Container, Dialog, Loader, Memo } from '../../components';
+import { Container, Dialog, Loader, Memo, SearchBar } from '../../components';
 import {
   deleteMemo,
   getArchivedMemos,
@@ -78,7 +78,16 @@ const Archive = () => {
     setMemoForAction(null);
   };
 
-  const onSearch = () => {};
+  //when memo array size is 0
+  //determine if there is no search results or the archive is empty
+  const getEmptyMessage = () => {
+    const keyword = searchParams.get('keyword');
+    if (keyword && keyword.length > 0) {
+      return 'No results found';
+    }
+
+    return 'Archive is empty';
+  };
 
   return (
     <Wrapper>
@@ -88,22 +97,29 @@ const Archive = () => {
           <Loader />
         ) : (
           <>
-            <div className='memos'>
-              {memos.map((memo, index) => {
-                return (
-                  <Memo
-                    key={memo._id}
-                    memo={memo}
-                    inArchive={true}
-                    onDeleted={onMemoDeleted}
-                    onUnarchived={onMemoUnarchived}
-                  />
-                );
-              })}
-            </div>
-            <div className='pagination-container'>
-              <Pagination count={numOfPages} />
-            </div>
+            <SearchBar hideDateRange hidePin hideSorting />
+            {memos.length > 0 ? (
+              <>
+                <div className='memos'>
+                  {memos.map((memo, index) => {
+                    return (
+                      <Memo
+                        key={memo._id}
+                        memo={memo}
+                        inArchive={true}
+                        onDeleted={onMemoDeleted}
+                        onUnarchived={onMemoUnarchived}
+                      />
+                    );
+                  })}
+                </div>
+                <div className='pagination-container'>
+                  <Pagination count={numOfPages} />
+                </div>
+              </>
+            ) : (
+              <p className='empty-message'>{getEmptyMessage()}</p>
+            )}
           </>
         )}
       </Container>
@@ -119,6 +135,7 @@ const Wrapper = styled.main`
     grid-template-columns: repeat(3, minmax(300px, 1fr));
     grid-row-gap: 20px;
     justify-items: center;
+    margin-top: 40px;
     /* grid-column-gap: 12px; */
   }
 
@@ -126,6 +143,12 @@ const Wrapper = styled.main`
     display: flex;
     justify-content: center;
     margin: 20px auto;
+  }
+
+  .empty-message {
+    align-self: center;
+    margin-top: 80px;
+    font-size: 20px;
   }
 `;
 

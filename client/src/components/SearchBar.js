@@ -7,7 +7,12 @@ import { sortingOptions } from '../constants';
 import DateRangePicker from './DateRangePicker';
 import { getYearMonthDayFromDateStr } from '../utils/date';
 
-const SearchBar = () => {
+const SearchBar = ({
+  hideKeyword = false,
+  hideSorting = false,
+  hidePin = false,
+  hideDateRange = false,
+}) => {
   const [keyword, setKeyword] = useState('');
   const [pinned, setPinned] = useState('');
   const [sorting, setSorting] = useState(0);
@@ -86,76 +91,86 @@ const SearchBar = () => {
   return (
     <Wrapper>
       {/* keyword input */}
-      <input
-        className='keyword-input'
-        type='text'
-        placeholder='Search for title, content or tags'
-        value={keyword}
-        onChange={handleKeywordChange}
-      />
+      {hideKeyword || (
+        <input
+          className='keyword-input'
+          type='text'
+          placeholder='Search for title, content or tags'
+          value={keyword}
+          onChange={handleKeywordChange}
+        />
+      )}
       {/* search button */}
       <button className='btn primary-btn' onClick={handleSearch}>
         Search
       </button>
       {/* sorting select */}
-      <select
-        className='sorting'
-        value={sorting}
-        onChange={handleSortingOptionChange}
-      >
-        {sortingOptions.map((option, index) => {
-          return (
-            <option key={option.label} value={index}>
-              {option.label}
-            </option>
-          );
-        })}
-      </select>
+      {hideSorting || (
+        <select
+          className='sorting'
+          value={sorting}
+          onChange={handleSortingOptionChange}
+        >
+          {sortingOptions.map((option, index) => {
+            return (
+              <option key={option.label} value={index}>
+                {option.label}
+              </option>
+            );
+          })}
+        </select>
+      )}
       {/* date range picker */}
-      <DateRangePicker
-        startDate={startDate}
-        endDate={endDate}
-        onChange={setDateRange}
-      />
+      {hideDateRange || (
+        <DateRangePicker
+          startDate={startDate}
+          endDate={endDate}
+          onChange={setDateRange}
+        />
+      )}
       {/* radio buttons */}
-      <fieldset className='radio-btn-container'>
-        <div className='row'>
-          <label>Show Both</label>
-          <input
-            type='radio'
-            value=''
-            name='pinned'
-            onChange={handlePinnedChange}
-            checked={!pinned}
-          />
-        </div>
-        <div>
-          <label>Show pinned only</label>
-          <input
-            type='radio'
-            value='true'
-            name='pinned'
-            onChange={handlePinnedChange}
-            checked={pinned === 'true'}
-          />
-        </div>
-        <div>
-          <label>Show non-pinned only</label>
-          <input
-            type='radio'
-            value='false'
-            name='pinned'
-            onChange={handlePinnedChange}
-            checked={pinned === 'false'}
-          />
-        </div>
-      </fieldset>
+      {hidePin || (
+        <fieldset className='radio-btn-container'>
+          <div className='row'>
+            <label>Show Both</label>
+            <input
+              type='radio'
+              value=''
+              name='pinned'
+              onChange={handlePinnedChange}
+              checked={!pinned}
+            />
+          </div>
+          <div>
+            <label>Show pinned only</label>
+            <input
+              type='radio'
+              value='true'
+              name='pinned'
+              onChange={handlePinnedChange}
+              checked={pinned === 'true'}
+            />
+          </div>
+          <div>
+            <label>Show non-pinned only</label>
+            <input
+              type='radio'
+              value='false'
+              name='pinned'
+              onChange={handlePinnedChange}
+              checked={pinned === 'false'}
+            />
+          </div>
+        </fieldset>
+      )}
     </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
   width: 80%;
+  min-width: 500px;
+  margin: auto;
 
   fieldset {
     border: 0;

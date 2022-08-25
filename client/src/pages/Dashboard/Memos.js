@@ -11,7 +11,8 @@ import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageTypes, toastMessage } from '../../utils/toast';
 import { generateSearchQueryString } from '../../utils/searchQuery';
-import { Pagination } from '@mui/material';
+import { Pagination, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
 
 const Memos = () => {
   const { memos, currentMemo, isLoading, numOfPages } = useSelector(
@@ -100,14 +101,36 @@ const Memos = () => {
     return page;
   };
 
+  //when memo array size is 0
+  //determine if there is no search results or the archive is empty
+  const getEmptyMessage = () => {
+    const keyword = searchParams.get('keyword');
+    const pinned = searchParams.get('pinned');
+    const start = searchParams.get('start');
+    const end = searchParams.get('end');
+
+    if (keyword || pinned || start || end) {
+      return 'No results found';
+    }
+
+    return 'There are no memos';
+  };
+
   return (
     <Wrapper>
       <Container>
         <SearchBar />
-        <AiOutlinePlusCircle className='add-button' onClick={addMemo} />
+        <Button
+          variant='outlined'
+          startIcon={<AddIcon />}
+          className='add-button'
+          onClick={addMemo}
+        >
+          New Memo
+        </Button>
         {isLoading ? (
           <Loader />
-        ) : (
+        ) : memos.length > 0 ? (
           <>
             <div className='memos'>
               {memos.map((memo, index) => {
@@ -122,6 +145,8 @@ const Memos = () => {
               />
             </div>
           </>
+        ) : (
+          <p className='empty-message'>{getEmptyMessage()}</p>
         )}
       </Container>
     </Wrapper>
@@ -144,17 +169,24 @@ const Wrapper = styled.main`
   }
 
   .add-button {
-    width: 40px;
+    /* width: 40px; */
     height: 40px;
-    align-self: center;
     margin: 20px 0;
     cursor: pointer;
+    margin-right: 10%;
+    align-self: flex-end;
   }
 
   .pagination-container {
     display: flex;
     justify-content: center;
     margin: 20px auto;
+  }
+
+  .empty-message {
+    align-self: center;
+    margin-top: 80px;
+    font-size: 20px;
   }
 `;
 
