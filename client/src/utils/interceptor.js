@@ -1,7 +1,21 @@
 import customFetch from './axios';
 import { removeUser } from '../features/user/userSlice';
+import { resetErrorMessage } from '../features/error-handling/error-handling-slice';
 
 export const interceptor = (store) => {
+  //pre api call
+  customFetch.interceptors.request.use(
+    (request) => {
+      //reset error message before api call
+      store.dispatch(resetErrorMessage());
+      return request;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  //post api call
   customFetch.interceptors.response.use(
     (response) => {
       return response;

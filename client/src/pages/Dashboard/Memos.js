@@ -7,7 +7,6 @@ import {
   getAllMemos,
   unarchiveOrTogglePin,
 } from '../../features/memo/memoSlice';
-import { AiOutlinePlusCircle } from 'react-icons/ai';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MessageTypes, toastMessage } from '../../utils/toast';
 import { generateSearchQueryString } from '../../utils/searchQuery';
@@ -120,14 +119,16 @@ const Memos = () => {
     <Wrapper>
       <Container>
         <SearchBar />
-        <Button
-          variant='outlined'
-          startIcon={<AddIcon />}
-          className='add-button'
-          onClick={addMemo}
-        >
-          New Memo
-        </Button>
+        <div className='add-btn-container'>
+          <Button
+            variant='outlined'
+            startIcon={<AddIcon />}
+            className='add-button'
+            onClick={addMemo}
+          >
+            New Memo
+          </Button>
+        </div>
         {isLoading ? (
           <Loader />
         ) : memos.length > 0 ? (
@@ -165,16 +166,22 @@ const Wrapper = styled.main`
     grid-template-columns: repeat(3, minmax(300px, 1fr));
     grid-row-gap: 20px;
     justify-items: center;
+    margin-top: 40px;
     /* grid-column-gap: 12px; */
   }
 
   .add-button {
     /* width: 40px; */
     height: 40px;
-    margin: 20px 0;
     cursor: pointer;
-    margin-right: 10%;
-    align-self: flex-end;
+    margin-right: 16px;
+  }
+
+  .add-btn-container {
+    display: flex;
+    width: 1000px;
+    margin: auto;
+    justify-content: flex-end;
   }
 
   .pagination-container {

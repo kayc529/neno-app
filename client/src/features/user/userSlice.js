@@ -8,6 +8,8 @@ import {
   loginUserThunk,
   registerUserThunk,
   logoutUserThunk,
+  getProfileThunk,
+  verifyCurrentPasswordThunk,
   getSecurityQuestionThunk,
   verifySecurityAnswerThunk,
   verifyPasswordTokenThunk,
@@ -47,6 +49,24 @@ export const logoutUser = createAsyncThunk(
   'user/logoutUser',
   async (_, thunkAPI) => {
     return logoutUserThunk('/auth/logout', thunkAPI);
+  }
+);
+
+export const getProfile = createAsyncThunk(
+  'user/getProfile',
+  async (_, thunkAPI) => {
+    return getProfileThunk('/auth/profile', thunkAPI);
+  }
+);
+
+export const verifyCurrentPassword = createAsyncThunk(
+  'user/verifyCurrentPassword',
+  async (password, thunkAPI) => {
+    return verifyCurrentPasswordThunk(
+      '/auth/verify-current-password',
+      password,
+      thunkAPI
+    );
   }
 );
 
@@ -152,6 +172,24 @@ const userSlice = createSlice({
     [logoutUser.rejected]: (state, { payload }) => {
       state.isLoading = false;
       console.log(payload);
+    },
+    [getProfile.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [getProfile.fulfilled]: (state, { payload }) => {
+      const { user } = payload;
+      storeUserInLocalStorage(user);
+      state.user = user;
+      state.isLoading = false;
+    },
+    [getProfile.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      console.log(payload);
+    },
+    [verifyCurrentPassword.pending]: (state) => {},
+    [verifyCurrentPassword.fulfilled]: (state, { payload }) => {},
+    [verifyCurrentPassword.rejected]: (state, { payload }) => {
+      console.log('verifyCurrentPassword: ', payload);
     },
     [getSecurityQuestion.pending]: (state) => {
       state.isLoading = true;

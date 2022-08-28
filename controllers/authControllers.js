@@ -162,6 +162,28 @@ const logout = async (req, res) => {
   res.status(200).json({ success: true });
 };
 
+const getUserProfile = async (req, res) => {
+  res.status(StatusCodes.OK).json({ success: true, user: req.user });
+};
+
+const verifyCurrentPassword = async (req, res) => {
+  const user = req.user;
+  const { currentPassword } = req.body;
+
+  console.log('currentPassword ', currentPassword);
+
+  const userFromDb = await User.findOne({ _id: user.userId });
+
+  const passwordMatch = await userFromDb.comparePassword(currentPassword);
+
+  if (passwordMatch) {
+    res.status(StatusCodes.OK).json({ success: true });
+    return;
+  }
+
+  throw new CustomError.BadRequestError('Invalid credentials');
+};
+
 const verifyEmail = async (req, res) => {
   res.status(200).send('verifyEmail');
 };
@@ -259,6 +281,8 @@ module.exports = {
   login,
   register,
   logout,
+  getUserProfile,
+  verifyCurrentPassword,
   verifyEmail,
   verifySecurityAnswer,
   verifyForgetPasswordInfo,

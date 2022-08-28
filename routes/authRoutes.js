@@ -4,6 +4,8 @@ const {
   register,
   login,
   logout,
+  getUserProfile,
+  verifyCurrentPassword,
   verifyEmail,
   verifyForgetPasswordInfo,
   verifySecurityAnswer,
@@ -16,6 +18,12 @@ router.post('/register', register);
 router.post('/login', login);
 router.delete('/logout', authenticateUser, logout);
 // router.post('/verify-email', verifyEmail);
+router.get('/profile', authenticateUser, getUserProfile);
+router.post(
+  '/verify-current-password',
+  authenticateUser,
+  verifyCurrentPassword
+);
 router.post('/get-security', verifyForgetPasswordInfo);
 router.post('/forgot-password', verifySecurityAnswer);
 router

@@ -13,8 +13,19 @@ import {
   Settings,
 } from './pages/Dashboard';
 import ResetPassword from './pages/ResetPassword';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { MessageTypes, toastMessage } from './utils/toast';
 
 function App() {
+  const { errorMsg } = useSelector((state) => state.errorHandling);
+
+  useEffect(() => {
+    if (errorMsg) {
+      toastMessage(errorMsg, MessageTypes.ERROR);
+    }
+  }, [errorMsg]);
+
   return (
     <>
       <BrowserRouter>
