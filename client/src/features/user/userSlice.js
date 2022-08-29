@@ -9,13 +9,12 @@ import {
   registerUserThunk,
   logoutUserThunk,
   getProfileThunk,
-  verifyCurrentPasswordThunk,
+  updateProfileThunk,
   getSecurityQuestionThunk,
   verifySecurityAnswerThunk,
   verifyPasswordTokenThunk,
   resetPasswordThunk,
 } from './userThunk';
-import { toastMessage, MessageTypes } from '../../utils/toast';
 
 const initialState = {
   isLoading: false,
@@ -25,6 +24,7 @@ const initialState = {
   passwordToken: '',
   isPasswordTokenValid: false,
   isResetPasswordSuccessful: false,
+  isCurrentPasswordValid: false,
   showDialog: false,
   dialogType: '',
   dialogTitle: '',
@@ -59,16 +59,23 @@ export const getProfile = createAsyncThunk(
   }
 );
 
-export const verifyCurrentPassword = createAsyncThunk(
-  'user/verifyCurrentPassword',
-  async (password, thunkAPI) => {
-    return verifyCurrentPasswordThunk(
-      '/auth/verify-current-password',
-      password,
-      thunkAPI
-    );
+export const updateProfile = createAsyncThunk(
+  'user/updateProfile',
+  async (newProfile, thunkAPI) => {
+    return updateProfileThunk('/auth/update-profile', newProfile, thunkAPI);
   }
 );
+
+// export const verifyCurrentPassword = createAsyncThunk(
+//   'user/verifyCurrentPassword',
+//   async (password, thunkAPI) => {
+//     return verifyCurrentPasswordThunk(
+//       '/auth/verify-current-password',
+//       password,
+//       thunkAPI
+//     );
+//   }
+// );
 
 export const getSecurityQuestion = createAsyncThunk(
   'user/getSecurityQuestion',
@@ -138,12 +145,10 @@ const userSlice = createSlice({
       storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
-      toastMessage(`Welcome, ${user.username}!`);
     },
     [loginUser.rejected]: (state, { payload }) => {
+      console.log('loginUser: ', payload);
       state.isLoading = false;
-      console.error(payload);
-      toastMessage('Login failed', MessageTypes.ERROR);
     },
     [registerUser.pending]: (state) => {
       state.isLoading = true;
@@ -153,12 +158,10 @@ const userSlice = createSlice({
       storeUserInLocalStorage(user);
       state.user = user;
       state.isLoading = false;
-      toastMessage(`Welcome, ${user.username}!`);
     },
     [registerUser.rejected]: (state, { payload }) => {
+      console.log('registerUser: ', payload);
       state.isLoading = false;
-      console.log(payload);
-      toastMessage('Registration failed', MessageTypes.ERROR);
     },
     [logoutUser.pending]: (state) => {
       state.isLoading = true;
@@ -167,11 +170,10 @@ const userSlice = createSlice({
       removeUserFromLocalStorage();
       state.user = null;
       state.isLoading = false;
-      toastMessage('Logged out', MessageTypes.SUCCESS);
     },
     [logoutUser.rejected]: (state, { payload }) => {
+      console.log('logoutUser: ', payload);
       state.isLoading = false;
-      console.log(payload);
     },
     [getProfile.pending]: (state) => {
       state.isLoading = true;
@@ -183,13 +185,27 @@ const userSlice = createSlice({
       state.isLoading = false;
     },
     [getProfile.rejected]: (state, { payload }) => {
+      console.log('getProfile :', payload);
       state.isLoading = false;
-      console.log(payload);
     },
-    [verifyCurrentPassword.pending]: (state) => {},
-    [verifyCurrentPassword.fulfilled]: (state, { payload }) => {},
-    [verifyCurrentPassword.rejected]: (state, { payload }) => {
-      console.log('verifyCurrentPassword: ', payload);
+    // [verifyCurrentPassword.pending]: (state) => {
+    //   state.isCurrentPasswordValid = false;
+    // },
+    // [verifyCurrentPassword.fulfilled]: (state) => {
+    //   state.isCurrentPasswordValid = true;
+    // },
+    // [verifyCurrentPassword.rejected]: (state, { payload }) => {
+    //   console.log('verifyCurrentPassword: ', payload);
+    //   state.isCurrentPasswordValid = false;
+    // },
+    [updateProfile.pending]: (state) => {},
+    [updateProfile.fulfilled]: (state, { payload }) => {
+      const { user } = payload;
+      storeUserInLocalStorage(user);
+      state.user = user;
+    },
+    [updateProfile.rejected]: (state, { payload }) => {
+      console.log('updateProfile: ', payload);
     },
     [getSecurityQuestion.pending]: (state) => {
       state.isLoading = true;
@@ -199,7 +215,7 @@ const userSlice = createSlice({
       state.securityQuestion = payload.securityQuestion;
     },
     [getSecurityQuestion.rejected]: (state, { payload }) => {
-      console.log(payload);
+      console.log('getSecurityQuestion: ', payload);
       state.isLoading = false;
     },
     [verifySecurityAnswer.pending]: (state) => {
@@ -210,7 +226,7 @@ const userSlice = createSlice({
       state.passwordToken = payload.passwordToken;
     },
     [verifySecurityAnswer.rejected]: (state, { payload }) => {
-      console.log(payload);
+      console.log('verifySecurityAnswer: ', payload);
       state.isLoading = false;
     },
     [verifyPasswordToken.pending]: (state) => {
@@ -222,21 +238,21 @@ const userSlice = createSlice({
       state.isPasswordTokenValid = true;
     },
     [verifyPasswordToken.rejected]: (state, { payload }) => {
-      console.log(payload);
+      console.log('verifyPasswordToken: ', payload);
       state.isLoading = false;
       state.isPasswordTokenValid = false;
-      toastMessage(payload, MessageTypes.ERROR);
     },
     [resetPassword.pending]: (state) => {
       state.isResetPasswordSuccessful = false;
     },
     [resetPassword.fulfilled]: (state) => {
       state.isResetPasswordSuccessful = true;
+      state.isPasswordTokenValid = false;
+      state.passwordToken = null;
     },
     [resetPassword.rejected]: (state, { payload }) => {
-      console.log(payload);
+      console.log('resetPassword: ', payload);
       state.isResetPasswordSuccessful = false;
-      toastMessage(payload, MessageTypes.ERROR);
     },
   },
 });

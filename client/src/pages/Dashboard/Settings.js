@@ -3,13 +3,11 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Container, FormRow } from '../../components';
-import {
-  getProfile,
-  verifyCurrentPassword,
-} from '../../features/user/userSlice';
+import { getProfile, updateProfile } from '../../features/user/userSlice';
 import { MessageTypes, toastMessage } from '../../utils/toast';
+import { fieldLengths } from '../../constants';
 const Settings = () => {
-  const { user } = useSelector((state) => state.user);
+  const { user, isCurrentPasswordValid } = useSelector((state) => state.user);
   const initState = {
     username: user.username,
     currentPassword: '',
@@ -24,6 +22,25 @@ const Settings = () => {
     dispatch(getProfile());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (isCurrentPasswordValid) {
+      updatePassword();
+    }
+  }, [isCurrentPasswordValid, dispatch]);
+
+  const updatePassword = () => {
+    //prevent unnecessary update if the current and new passwords are the same
+    if (currentPassword === newPassword) {
+      toastMessage(
+        'New password cannot be the same as the current one',
+        MessageTypes.ERROR
+      );
+      return;
+    }
+    //update current password
+    dispatch(updateProfile(newPassword));
+  };
+
   const onDataChange = (e) => {
     const name = e.target.name;
     const value = e.target.value;
@@ -32,19 +49,33 @@ const Settings = () => {
     setData(temp);
   };
 
-  const handleUpdate = async (e) => {
+  const handleUpdate = (e) => {
     e.preventDefault();
 
-    //check password fields
-    if (currentPassword.length < 6) {
+    if (
+      !currentPassword ||
+      (username === user.username && newPassword.length === 0)
+    ) {
+      console.log('nothing to update');
+      return;
+    }
+
+    // validate fields
+    if (username.length < fieldLengths.USERNAME_LENGTH) {
       toastMessage(
-        'Your current password must be at least 6 characters in length',
+        `Your username must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
         MessageTypes.ERROR
       );
       return;
-    } else if (newPassword.length < 6) {
+    } else if (currentPassword.length < fieldLengths.PASSWORD_LENGTH) {
       toastMessage(
-        'Your new password must be at least 6 characters in length',
+        `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
+        MessageTypes.ERROR
+      );
+      return;
+    } else if (newPassword.length < fieldLengths.PASSWORD_LENGTH) {
+      toastMessage(
+        `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
         MessageTypes.ERROR
       );
       return;
@@ -54,12 +85,9 @@ const Settings = () => {
     }
 
     //verify current password
-    await dispatch(verifyCurrentPassword(currentPassword));
-    if (currentPassword === newPassword) {
-      toastMessage('You cannot set the same password', MessageTypes.ERROR);
-      return;
-    }
-    //update profile
+    dispatch(
+      updateProfile({ currentPassword, newUsername: username, newPassword })
+    );
   };
 
   return (

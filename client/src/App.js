@@ -18,13 +18,23 @@ import { useEffect } from 'react';
 import { MessageTypes, toastMessage } from './utils/toast';
 
 function App() {
-  const { errorMsg } = useSelector((state) => state.errorHandling);
+  const { errorMsg, successMsg, neutralMsg } = useSelector(
+    (state) => state.messages
+  );
 
   useEffect(() => {
     if (errorMsg) {
       toastMessage(errorMsg, MessageTypes.ERROR);
     }
-  }, [errorMsg]);
+
+    if (successMsg) {
+      toastMessage(successMsg, MessageTypes.SUCCESS);
+    }
+
+    if (neutralMsg) {
+      toastMessage(neutralMsg, MessageTypes.DEFAULT);
+    }
+  }, [errorMsg, successMsg, neutralMsg]);
 
   return (
     <>

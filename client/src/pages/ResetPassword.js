@@ -25,7 +25,6 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (isResetPasswordSuccessful) {
-      toastMessage('Password updated', MessageTypes.SUCCESS);
       navigate('/login');
     }
   }, [isResetPasswordSuccessful, navigate]);

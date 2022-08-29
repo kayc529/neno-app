@@ -166,22 +166,38 @@ const getUserProfile = async (req, res) => {
   res.status(StatusCodes.OK).json({ success: true, user: req.user });
 };
 
-const verifyCurrentPassword = async (req, res) => {
+const updateProfile = async (req, res) => {
   const user = req.user;
-  const { currentPassword } = req.body;
+  const { currentPassword, newUsername, newPassword } = req.body;
 
-  console.log('currentPassword ', currentPassword);
+  const userFromDB = await User.findOne({ _id: user.userId });
+  const isCurrentPasswordCorrect = await userFromDB.comparePassword(
+    currentPassword
+  );
 
-  const userFromDb = await User.findOne({ _id: user.userId });
-
-  const passwordMatch = await userFromDb.comparePassword(currentPassword);
-
-  if (passwordMatch) {
-    res.status(StatusCodes.OK).json({ success: true });
-    return;
+  if (!isCurrentPasswordCorrect) {
+    throw new CustomError.BadRequestError('Invalid credentials');
   }
 
-  throw new CustomError.BadRequestError('Invalid credentials');
+  if (currentPassword === newPassword) {
+    throw new CustomError.BadRequestError(
+      'New password cannot be identical to the current password'
+    );
+  }
+
+  if (newUsername) {
+    userFromDB.username = newUsername;
+  }
+
+  userFromDB.password = newPassword;
+  await userFromDB.save();
+
+  console.log(userFromDB);
+  const updatedTokenUser = createTokenUser(userFromDB);
+
+  res
+    .status(StatusCodes.OK)
+    .json({ success: true, user: updatedTokenUser, msg: 'User info updated' });
 };
 
 const verifyEmail = async (req, res) => {
@@ -282,7 +298,7 @@ module.exports = {
   register,
   logout,
   getUserProfile,
-  verifyCurrentPassword,
+  updateProfile,
   verifyEmail,
   verifySecurityAnswer,
   verifyForgetPasswordInfo,

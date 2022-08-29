@@ -5,7 +5,7 @@ const {
   login,
   logout,
   getUserProfile,
-  verifyCurrentPassword,
+  updateProfile,
   verifyEmail,
   verifyForgetPasswordInfo,
   verifySecurityAnswer,
@@ -19,11 +19,7 @@ router.post('/login', login);
 router.delete('/logout', authenticateUser, logout);
 // router.post('/verify-email', verifyEmail);
 router.get('/profile', authenticateUser, getUserProfile);
-router.post(
-  '/verify-current-password',
-  authenticateUser,
-  verifyCurrentPassword
-);
+router.patch('/update-profile', authenticateUser, updateProfile);
 router.post('/get-security', verifyForgetPasswordInfo);
 router.post('/forgot-password', verifySecurityAnswer);
 router

@@ -60,6 +60,7 @@ const UserSchema = new mongoose.Schema(
 UserSchema.pre('save', async function () {
   //hash password before saving in db
   //prevent overwriting the password when saving other changes
+  console.log('pre save');
   if (!this.isModified('password') && !this.isModified('securityAnswer')) {
     return;
   }
