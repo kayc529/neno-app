@@ -59,7 +59,7 @@ export const getProfileThunk = async (url, thunkAPI) => {
 export const updateProfileThunk = async (url, newProfile, thunkAPI) => {
   try {
     const res = await customFetch.patch(url, newProfile);
-    thunkAPI.dispatch(updateSuccessMessage('Profile updated'));
+    thunkAPI.dispatch(updateSuccessMessage({ msg: 'Profile updated' }));
     return res.data;
   } catch (error) {
     thunkAPI.dispatch(updateErrorMessage({ msg: error.response.data.msg }));

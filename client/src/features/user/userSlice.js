@@ -66,17 +66,6 @@ export const updateProfile = createAsyncThunk(
   }
 );
 
-// export const verifyCurrentPassword = createAsyncThunk(
-//   'user/verifyCurrentPassword',
-//   async (password, thunkAPI) => {
-//     return verifyCurrentPasswordThunk(
-//       '/auth/verify-current-password',
-//       password,
-//       thunkAPI
-//     );
-//   }
-// );
-
 export const getSecurityQuestion = createAsyncThunk(
   'user/getSecurityQuestion',
   async (info, thunkAPI) => {
@@ -188,16 +177,6 @@ const userSlice = createSlice({
       console.log('getProfile :', payload);
       state.isLoading = false;
     },
-    // [verifyCurrentPassword.pending]: (state) => {
-    //   state.isCurrentPasswordValid = false;
-    // },
-    // [verifyCurrentPassword.fulfilled]: (state) => {
-    //   state.isCurrentPasswordValid = true;
-    // },
-    // [verifyCurrentPassword.rejected]: (state, { payload }) => {
-    //   console.log('verifyCurrentPassword: ', payload);
-    //   state.isCurrentPasswordValid = false;
-    // },
     [updateProfile.pending]: (state) => {},
     [updateProfile.fulfilled]: (state, { payload }) => {
       const { user } = payload;

@@ -26,11 +26,9 @@ function App() {
     if (errorMsg) {
       toastMessage(errorMsg, MessageTypes.ERROR);
     }
-
     if (successMsg) {
       toastMessage(successMsg, MessageTypes.SUCCESS);
     }
-
     if (neutralMsg) {
       toastMessage(neutralMsg, MessageTypes.DEFAULT);
     }

@@ -49,45 +49,68 @@ const Settings = () => {
     setData(temp);
   };
 
+  const validateFields = () => {
+    let errorMsg = null;
+
+    if (!currentPassword) {
+      //NO CURRENT PASSWORD
+      errorMsg = 'You must enter your current password to update your profile';
+    } else if (username.length < fieldLengths.USERNAME_LENGTH) {
+      //USERNAME TOO SHORT
+      errorMsg = `Your username must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`;
+    } else if (currentPassword.length < fieldLengths.PASSWORD_LENGTH) {
+      //CURRENT PASSWORD TOO SHORT
+      errorMsg = `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`;
+    } else if (
+      newPassword &&
+      newPassword.length < fieldLengths.PASSWORD_LENGTH
+    ) {
+      //NEW PASSWORD TOO SHORT
+      errorMsg = `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`;
+    } else if (newPassword && newPassword !== retypePassword) {
+      //TWO PASSWORDS DON'T MATCH
+      errorMsg = 'The two passwords does not match';
+    }
+
+    if (errorMsg) {
+      toastMessage(errorMsg, MessageTypes.ERROR);
+      return false;
+    }
+
+    return true;
+  };
+
   const handleUpdate = (e) => {
     e.preventDefault();
 
-    if (
-      !currentPassword ||
-      (username === user.username && newPassword.length === 0)
-    ) {
+    console.log('username: ', username);
+    console.log('user.username: ', user.username);
+
+    if (username === user.username && newPassword.length === 0) {
       console.log('nothing to update');
       return;
     }
 
     // validate fields
-    if (username.length < fieldLengths.USERNAME_LENGTH) {
-      toastMessage(
-        `Your username must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
-        MessageTypes.ERROR
-      );
-      return;
-    } else if (currentPassword.length < fieldLengths.PASSWORD_LENGTH) {
-      toastMessage(
-        `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
-        MessageTypes.ERROR
-      );
-      return;
-    } else if (newPassword.length < fieldLengths.PASSWORD_LENGTH) {
-      toastMessage(
-        `Your password must be at least ${fieldLengths.USERNAME_LENGTH} characters in length`,
-        MessageTypes.ERROR
-      );
-      return;
-    } else if (newPassword !== retypePassword) {
-      toastMessage('The two passwords does not match', MessageTypes.ERROR);
+    const isValid = validateFields();
+
+    if (!isValid) {
       return;
     }
 
+    let newProfile = {
+      currentPassword: currentPassword,
+      newUsername: username,
+    };
+
+    if (newPassword) {
+      newProfile = { ...newProfile, newPassword: newPassword };
+    }
+
+    console.log(newProfile);
+
     //verify current password
-    dispatch(
-      updateProfile({ currentPassword, newUsername: username, newPassword })
-    );
+    dispatch(updateProfile(newProfile));
   };
 
   return (
@@ -96,17 +119,17 @@ const Settings = () => {
         <form>
           <FormRow
             type='text'
-            name='username'
-            displayName='Username'
-            value={username}
-            onChange={onDataChange}
-          />
-          <FormRow
-            type='text'
             name='email'
             value={user.email}
             onChange={null}
             disabled
+          />
+          <FormRow
+            type='text'
+            name='username'
+            displayName='Username'
+            value={username}
+            onChange={onDataChange}
           />
           <FormRow
             type='password'
@@ -129,9 +152,12 @@ const Settings = () => {
             value={retypePassword}
             onChange={onDataChange}
           />
-          <button className='btn primary-btn' onClick={handleUpdate}>
-            Update
-          </button>
+          <div>
+            <button className='btn primary-btn' onClick={handleUpdate}>
+              Update
+            </button>
+            <input className='btn secondary-btn' type='reset' />
+          </div>
         </form>
       </Container>
     </Wrapper>

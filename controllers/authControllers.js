@@ -179,7 +179,7 @@ const updateProfile = async (req, res) => {
     throw new CustomError.BadRequestError('Invalid credentials');
   }
 
-  if (currentPassword === newPassword) {
+  if (newPassword && currentPassword === newPassword) {
     throw new CustomError.BadRequestError(
       'New password cannot be identical to the current password'
     );
@@ -189,7 +189,10 @@ const updateProfile = async (req, res) => {
     userFromDB.username = newUsername;
   }
 
-  userFromDB.password = newPassword;
+  if (newPassword) {
+    userFromDB.password = newPassword;
+  }
+
   await userFromDB.save();
 
   console.log(userFromDB);
@@ -197,7 +200,7 @@ const updateProfile = async (req, res) => {
 
   res
     .status(StatusCodes.OK)
-    .json({ success: true, user: updatedTokenUser, msg: 'User info updated' });
+    .json({ success: true, user: updatedTokenUser, msg: 'Profile updated' });
 };
 
 const verifyEmail = async (req, res) => {
